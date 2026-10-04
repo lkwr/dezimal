@@ -1,0 +1,28 @@
+{
+	"name": "dezi",
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"build": "tsc --noEmit && node build.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.15",
+		"@types/node": "^26.6.4",
+		"tsdown": "^0.23.0",
+		"tsx": "^4.23.15",
+		"typescript": "^6.0.3",
+		"vitest": "^5.0.3"
+	},
+	"exports": {
+		".": "./dist/index.js",
+		"./extensions/absolute": "./dist/extensions/absolute.js",
+		"./extensions/compare": "./dist/extensions/compare.js",
+		"./extensions/minus": "./dist/extensions/minus.js",
+		"./extensions/negate": "./dist/extensions/negate.js",
+		"./extensions/plus": "./dist/extensions/plus.js",
+		"./extensions/times": "./dist/extensions/times.js",
+		"./extensions/to-plain-string": "./dist/extensions/to-plain-string.js",
+		"./extensions/to-string": "./dist/extensions/to-string.js",
+		"./package.json": "./package.json"
+	}
+}
