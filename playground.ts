@@ -1,6 +1,6 @@
-import { Decimal } from "./src/index.ts";
+import { Decimal } from "./src/decimal.ts";
 
-import "./src/extensions/plus.ts";
+import "./src/ops/plus.ts";
 
 declare module "dezi" {
 	interface DecimalConstructor {

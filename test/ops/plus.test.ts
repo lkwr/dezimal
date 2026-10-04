@@ -4,7 +4,7 @@ import {
 	type DecimalLike,
 	type RawDecimal,
 } from "../../src/decimal.ts";
-import "../../src/extensions/plus.ts";
+import "../../src/ops/plus.ts";
 
 /** Runs `plus` and returns the normalized raw [coefficient, exponent] tuple. */
 const plus = (self: DecimalLike, other: DecimalLike): RawDecimal =>

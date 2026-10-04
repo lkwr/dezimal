@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Decimal } from "../../src/decimal.ts";
-import { Decimal as DecimalConstructor } from "../../src/index.ts";
+import { Decimal, Decimal as DecimalConstructor } from "../../src/decimal.ts";
 import { extend, extendStatic } from "../../src/utils/extend.ts";
 
 // tap/peek exist only so `extend`'s keyof-typed arguments compile; they are

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Decimal } from "../../src/decimal.ts";
-import "../../src/extensions/to-string.ts";
+import "../../src/format/to-string.ts";
 
 describe("notation thresholds (statics)", () => {
 	it("declares the plain/exponential boundaries on import", () => {

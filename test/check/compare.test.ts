@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Decimal } from "../../src/decimal.ts";
-import "../../src/extensions/compare.ts";
+import "../../src/check/compare.ts";
 
 describe("compare (instance)", () => {
 	it("compares basic values", () => {

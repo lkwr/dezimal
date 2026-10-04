@@ -16,7 +16,11 @@ await writeFile("./dist/package.json", JSON.stringify(packageJson, null, 2));
 await build({
 	entry: {
 		index: "src/index.ts",
-		"extensions/*": "src/extensions/*.ts",
+		"ops/*": "src/ops/*.ts",
+		"check/*": "src/check/*.ts",
+		"format/*": "src/format/*.ts",
+		"config/*": "src/config/*.ts",
+		"preset/*": "src/preset/*.ts",
 	},
 	outDir: "dist",
 	dts: true,

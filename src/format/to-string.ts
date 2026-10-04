@@ -14,16 +14,14 @@ declare module "dezi" {
 		/** Exponents smaller-or-equal to this are formatted exponentially. */
 		minPlainExponent: number;
 	}
-}
 
-extendStatic("maxPlainExponent", 20);
-extendStatic("minPlainExponent", -7);
-
-declare module "dezi" {
 	interface Decimal {
 		toString(): string;
 	}
 }
+
+extendStatic("maxPlainExponent", 20);
+extendStatic("minPlainExponent", -7);
 
 extend("toString", function (this: Decimal) {
 	if (this.coefficient === 0n) {
