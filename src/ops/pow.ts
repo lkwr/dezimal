@@ -45,21 +45,6 @@ declare module "dezi" {
 		 * leaves the `Decimal.exponentLimit` range.
 		 */
 		power(exponent: DecimalLike): Decimal;
-		/**
-		 * Returns this value raised to the given exponent.
-		 *
-		 * Integer exponents within the safe-integer range are computed by
-		 * exponentiation by squaring, with intermediates kept to
-		 * `Decimal.precision + 8` significant digits, and rounded to
-		 * `Decimal.precision` significant digits using the `Decimal.rounding`
-		 * mode. Any other exponent is computed as exp(exponent · ln(value))
-		 * and rounded to `Decimal.precision` significant digits.
-		 *
-		 * Throws a RangeError when zero is raised to a negative power, when a
-		 * negative base meets a non-integer exponent, or when the result
-		 * leaves the `Decimal.exponentLimit` range.
-		 */
-		toPower(exponent: DecimalLike): Decimal;
 	}
 }
 
@@ -268,5 +253,5 @@ extend(
 	function pow(this: Decimal, exponent: DecimalLike): Decimal {
 		return powDecimals(this, exponent);
 	},
-	["power", "toPower"],
+	["power"],
 );

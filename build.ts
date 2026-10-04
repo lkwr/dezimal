@@ -14,26 +14,34 @@ const distPackageJson = {
 	type: packageJson.type,
 	author: packageJson.author,
 	license: packageJson.license,
+
+	exports: {
+		".": "./index.js",
+		"./ops/*": "./ops/*.js",
+		"./check/*": "./check/*.js",
+		"./format/*": "./format/*.js",
+		"./config/*": "./config/*.js",
+		"./preset/*": "./preset/*.js",
+	},
 };
+
+await build({
+	entry: {
+		index: "./src/index.ts",
+		"ops/*": "./src/ops/*.ts",
+		"check/*": "./src/check/*.ts",
+		"format/*": "./src/format/*.ts",
+		"config/*": "./src/config/*.ts",
+		"preset/*": "./src/preset/*.ts",
+	},
+	dts: true,
+	format: "esm",
+	platform: "neutral",
+	minify: { compress: true, mangle: { keepNames: true } },
+	outDir: path("./dist"),
+});
 
 await writeFile(
 	"./dist/package.json",
 	JSON.stringify(distPackageJson, null, 2),
 );
-
-await build({
-	entry: {
-		index: "src/index.ts",
-		"ops/*": "src/ops/*.ts",
-		"check/*": "src/check/*.ts",
-		"format/*": "src/format/*.ts",
-		"config/*": "src/config/*.ts",
-		"preset/*": "src/preset/*.ts",
-	},
-	outDir: "dist",
-	dts: true,
-	clean: true,
-	format: "esm",
-	platform: "neutral",
-	minify: { compress: true, mangle: { keepNames: true } },
-});

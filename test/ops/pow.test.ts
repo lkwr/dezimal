@@ -110,10 +110,9 @@ describe("pow", () => {
 		);
 	});
 
-	it("exposes power and toPower as aliases", () => {
+	it("exposes power as aliases", () => {
 		const self = new Decimal(2);
 		expect(self.power(10).raw).toEqual(self.pow(10).raw);
-		expect(self.toPower(10).raw).toEqual(self.pow(10).raw);
 	});
 
 	it("returns exact reciprocals for negative integer exponents", () => {

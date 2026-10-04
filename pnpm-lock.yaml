@@ -14,6 +14,9 @@ importers:
       '@types/node':
         specifier: ^26.6.4
         version: 26.6.4
+      decimal.js:
+        specifier: ^10.6.0
+        version: 10.6.0
       node:
         specifier: runtime:26.10.0
         version: runtime:26.10.0
@@ -535,6 +538,9 @@ packages:
   chai@6.3.0:
     resolution: {integrity: sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg==}
     engines: {node: '>=18'}
+
+  decimal.js@10.6.0:
+    resolution: {integrity: sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==}
 
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
@@ -1317,6 +1323,8 @@ snapshots:
   cac@7.0.0: {}
 
   chai@6.3.0: {}
+
+  decimal.js@10.6.0: {}
 
   defu@6.1.7: {}
 
