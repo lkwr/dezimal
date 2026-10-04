@@ -1,8 +1,9 @@
-import type { RoundingMode } from "dezi";
 import { Decimal, type DecimalLike } from "../decimal.ts";
-import { normalize, pow10 } from "../utils/common.ts";
+import { digitsOf, normalize, pow10 } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
+import { isqrt } from "../utils/integer-roots.ts";
 import { parse } from "../utils/parse.ts";
+import { roundingIncrement } from "../utils/rounding.ts";
 
 // required extensions
 import "../config/precision.ts";
@@ -42,7 +43,7 @@ const sqrtDecimals = (value: DecimalLike): Decimal => {
 		ePrime -= 1;
 	}
 
-	const digitsC = cPrime.toString().length;
+	const digitsC = digitsOf(cPrime);
 	// Floor of log10(√cPrime), from digit counts alone: √cPrime lies in
 	// [10^sciExpRoot, 10^(sciExpRoot + 1)).
 	const sciExpRoot = Math.floor((digitsC - 1) / 2);
@@ -85,39 +86,17 @@ const sqrtDecimals = (value: DecimalLike): Decimal => {
 
 	// Results are non-negative here, so ceil matches up, floor matches down,
 	// and the half-ceil/half-floor ties resolve away from/towards zero.
-	const mode: RoundingMode = Decimal.rounding;
 	let q = root / scaleOut;
-	let increment: boolean;
-	switch (mode) {
-		case "up":
-			increment = discarded;
-			break;
-		case "down":
-			increment = false;
-			break;
-		case "ceil":
-			increment = discarded;
-			break;
-		case "floor":
-			increment = false;
-			break;
-		case "half-up":
-			increment = overHalf || atHalf;
-			break;
-		case "half-down":
-			increment = overHalf;
-			break;
-		case "half-even":
-			increment = overHalf || (atHalf && (q & 1n) === 1n);
-			break;
-		case "half-ceil":
-			increment = overHalf || atHalf;
-			break;
-		case "half-floor":
-			increment = overHalf;
-			break;
-	}
-	if (increment) {
+	if (
+		roundingIncrement(Decimal.rounding, {
+			discarded,
+			overHalf,
+			atHalf,
+			isOdd: (q & 1n) === 1n,
+			positive: true,
+			negative: false,
+		})
+	) {
 		q += 1n;
 	}
 
@@ -132,20 +111,6 @@ const sqrtDecimals = (value: DecimalLike): Decimal => {
 		);
 	}
 	return new Decimal([coefficient, resultExponent]);
-};
-
-/** Newton iteration for floor(√n), n ≥ 0. */
-const isqrt = (n: bigint): bigint => {
-	if (n < 2n) {
-		return n;
-	}
-	let x = 1n << BigInt(Math.ceil((n.toString(2).length + 1) / 2));
-	let y = (x + n / x) >> 1n;
-	while (y < x) {
-		x = y;
-		y = (x + n / x) >> 1n;
-	}
-	return x;
 };
 
 extend("sqrt", function sqrt(this: Decimal): Decimal {

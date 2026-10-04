@@ -1,6 +1,7 @@
-// Measures the bundled JavaScript size of the bare core (`src/index.ts`) and
-// every preset (`src/preset/*.ts`) with rolldown. Bundles are generated in
-// memory only — the script reads source files and writes nothing to disk.
+// Measures the bundled JavaScript size of the bare core (`dist/index.js`) and
+// every preset (`dist/preset/*.js`) with rolldown, based on the files as built
+// by `node build.ts` — run the build first. Bundles are generated in memory
+// only — the script reads the dist output and writes nothing to disk.
 //
 // Presets are measured the way consumers use them: the core export plus a
 // side-effect import of the preset in one chunk (a virtual entry module).
@@ -8,18 +9,31 @@
 //
 // Usage: node scripts/bundle-size.ts
 
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { type Plugin, rolldown } from "rolldown";
 
 const root = resolve(import.meta.dirname, "..");
-const coreEntry = resolve(root, "src", "index.ts");
-const decimalCore = resolve(root, "src", "decimal.ts");
+const distDir = resolve(root, "dist");
+const coreEntry = resolve(distDir, "index.js");
 
-const presets = readdirSync(resolve(root, "src", "preset"))
-	.filter((name) => name.endsWith(".ts"))
-	.map((name) => name.replace(/\.ts$/, ""))
+if (!existsSync(coreEntry)) {
+	throw new Error("dist/index.js not found — run `node build.ts` first");
+}
+
+// The core class lives in a hashed chunk named after src/decimal.ts.
+const decimalChunkName = readdirSync(distDir).find((name) =>
+	/^decimal-.*\.js$/.test(name),
+);
+if (!decimalChunkName) {
+	throw new Error("dist/decimal-*.js not found — run `node build.ts` first");
+}
+const decimalCore = resolve(distDir, decimalChunkName);
+
+const presets = readdirSync(resolve(distDir, "preset"))
+	.filter((name) => name.endsWith(".js"))
+	.map((name) => name.replace(/\.js$/, ""))
 	.sort();
 
 const VIRTUAL_ID = "\0dezi-preset-entry";
@@ -54,9 +68,7 @@ const entries: Entry[] = [
 	...presets.map((preset) => ({
 		preset,
 		input: VIRTUAL_ID,
-		plugins: [
-			presetEntryPlugin(resolve(root, "src", "preset", `${preset}.ts`)),
-		],
+		plugins: [presetEntryPlugin(resolve(distDir, "preset", `${preset}.js`))],
 	})),
 ];
 
@@ -100,7 +112,7 @@ async function measure(entry: Entry): Promise<{
 	for (const result of [raw, min]) {
 		if (!result.includesCore) {
 			throw new Error(
-				`core (src/decimal.ts) is not part of the bundle for ${entry.preset}`,
+				`core (dist/${decimalChunkName}) is not part of the bundle for ${entry.preset}`,
 			);
 		}
 	}

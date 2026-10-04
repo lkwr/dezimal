@@ -12,6 +12,11 @@ declare module "dezi" {
 
 function plus(this: Decimal, input: DecimalLike): Decimal {
 	const other = parse(input);
+	// Zero short-circuits before alignment: aligning exponents can materialize
+	// a power of ten across the whole exponent gap, which is pure waste against
+	// a zero coefficient.
+	if (this.coefficient === 0n) return new Decimal(other);
+	if (other[0] === 0n) return new Decimal([this.coefficient, this.exponent]);
 	const exponent = Math.min(this.exponent, other[1]);
 	const alignedSelf = this.coefficient * pow10(this.exponent - exponent);
 	const alignedOther = other[0] * pow10(other[1] - exponent);

@@ -1,13 +1,5 @@
-import { Decimal } from "./src/decimal.ts";
+import { Decimal } from "./dist/index.js";
 
-import "./src/ops/plus.ts";
+import "./dist/ops/plus.js";
 
-declare module "dezi" {
-	interface DecimalConstructor {
-		myValue: string;
-	}
-}
-
-Decimal.myValue = "1000";
-
-console.log(Decimal.prototype);
+console.log(Decimal, Decimal.prototype, new Decimal(23));

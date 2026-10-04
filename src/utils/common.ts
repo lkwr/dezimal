@@ -19,3 +19,12 @@ export const normalize = ([coefficient, exponent]: RawDecimal): RawDecimal => {
 	}
 	return [c, e];
 };
+
+/** Digit count of a bigint's magnitude (sign excluded). */
+export const digitsOf = (coefficient: bigint): number =>
+	abs(coefficient).toString().length;
+
+// Float estimates only: they merely seed searches that exact bigint
+// comparisons verify downstream, so double precision is plenty.
+export const LOG2_10 = Math.log2(10);
+export const LOG10_2 = Math.log10(2);

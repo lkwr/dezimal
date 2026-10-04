@@ -70,27 +70,28 @@ Notes:
 
 #### Quantization & range
 
-| Extension           | Sides | dezi name (aliases)                          | decimal.js name                                                                      | Presets        | Priority | Status                              |
-| ------------------- | ----- | -------------------------------------------- | ------------------------------------------------------------------------------------ | -------------- | -------- | ----------------------------------- |
-| `floor`             | I     | `floor`                                      | instance `floor`; dezi drops static `Decimal.floor(x)`                               | rounding, full | P1       | ✅ (exact)                          |
-| `ceil`              | I     | `ceil`                                       | instance `ceil`; dezi drops static `Decimal.ceil(x)`                                 | rounding, full | P1       | ✅ (exact)                          |
-| `truncate`          | I     | `truncate` (alias `trunc`)                   | instance `truncated` (alias `trunc`); dezi drops static `Decimal.trunc(x)`           | rounding, full | P1       | ✅ (exact)                          |
-| `round`             | I     | `round`                                      | instance `round()` (whole number, no args); dezi drops static `Decimal.round(x)`     | rounding, full | P1       | ✅ (exact)                          |
-| `to-decimal-places` | I     | `toDecimalPlaces(dp?, mode?)` (alias `toDP`) | instance `toDecimalPlaces` (alias `toDP`); no static                                 | rounding, full | P1       | ✅ (omitted `dp` → unchanged value) |
-| `to-nearest`        | I     | `toNearest(x, rm?)`                          | instance `toNearest` (exact); no static                                              | rounding, full | P2       | ⬜ (quantize to multiples of `x`)   |
-| `clamp`             | I     | `clamp(min, max)`                            | instance `clampedTo` (alias `clamp`); dezi drops static `Decimal.clamp(x, min, max)` | rounding, full | P1       | ✅ (exact)                          |
+| Extension               | Sides | dezi name (aliases)                              | decimal.js name                                                                      | Presets        | Priority | Status                                   |
+| ----------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------------------------------ | -------------- | -------- | ---------------------------------------- |
+| `floor`                 | I     | `floor`                                          | instance `floor`; dezi drops static `Decimal.floor(x)`                               | rounding, full | P1       | ✅ (exact)                               |
+| `ceil`                  | I     | `ceil`                                           | instance `ceil`; dezi drops static `Decimal.ceil(x)`                                 | rounding, full | P1       | ✅ (exact)                               |
+| `truncate`              | I     | `truncate` (alias `trunc`)                       | instance `truncated` (alias `trunc`); dezi drops static `Decimal.trunc(x)`           | rounding, full | P1       | ✅ (exact)                               |
+| `round`                 | I     | `round`                                          | instance `round()` (whole number, no args); dezi drops static `Decimal.round(x)`     | rounding, full | P1       | ✅ (exact)                               |
+| `to-decimal-places`     | I     | `toDecimalPlaces(dp?, mode?)` (alias `toDP`)     | instance `toDecimalPlaces` (alias `toDP`); no static                                 | rounding, full | P1       | ✅ (omitted `dp` → unchanged value)      |
+| `to-nearest`            | I     | `toNearest(x, rm?)`                              | instance `toNearest` (exact); no static                                              | rounding, full | P2       | ✅ (exact; quantize to multiples of `x`) |
+| `to-significant-digits` | I     | `toSignificantDigits(sd?, mode?)` (alias `toSD`) | instance `toSignificantDigits` (alias `toSD`); no static                             | rounding, full | P2       | ✅ (omitted `sd` → unchanged value)      |
+| `clamp`                 | I     | `clamp(min, max)`                                | instance `clampedTo` (alias `clamp`); dezi drops static `Decimal.clamp(x, min, max)` | rounding, full | P1       | ✅ (exact)                               |
 
 #### Powers, roots & logarithms
 
-| Extension | Sides | dezi name (aliases)                    | decimal.js name                                                                                                                        | Presets     | Priority | Status                                                   |
-| --------- | ----- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------- | -------------------------------------------------------- |
-| `sqrt`    | I     | `sqrt`                                 | instance `squareRoot` (alias `sqrt`); dezi drops static `Decimal.sqrt(x)`                                                              | power, full | P1       | ✅ (correctly rounded)                                   |
-| `pow`     | I     | `pow` (aliases `power`, `toPower`)     | instance `toPower` (alias `pow`); dezi drops static `Decimal.pow(base, exponent)`                                                      | power, full | P2       | ⬜ (integer exponents exact; fractional precision-based) |
-| `cbrt`    | I     | `cbrt`                                 | instance `cubeRoot` (alias `cbrt`); dezi drops static `Decimal.cbrt(x)`                                                                | power, full | P2       | ⬜ (real sign-preserving root)                           |
-| `exp`     | I     | `exp`                                  | instance `naturalExponential` (alias `exp`); dezi drops static `Decimal.exp(x)`                                                        | power, full | P2       | ⬜                                                       |
-| `ln`      | I     | `ln`                                   | instance `naturalLogarithm` (alias `ln`); dezi drops static `Decimal.ln(x)`                                                            | power, full | P2       | ⬜ (digit-limit note below)                              |
-| `log`     | I     | `log(base?)` + statics `log2`, `log10` | instance `logarithm` (alias `log`; default base 10); dezi drops statics `Decimal.log(x, base?)`, `Decimal.log2(x)`, `Decimal.log10(x)` | power, full | P2       | ⬜                                                       |
-| `hypot`   | S     | `hypot(...values)`                     | static `Decimal.hypot(x, y, ...)`                                                                                                      | power, full | P2       | ⬜ (square root of the sum of squares)                   |
+| Extension | Sides | dezi name (aliases)                    | decimal.js name                                                                                                                        | Presets     | Priority | Status                                                                                                                     |
+| --------- | ----- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `sqrt`    | I     | `sqrt`                                 | instance `squareRoot` (alias `sqrt`); dezi drops static `Decimal.sqrt(x)`                                                              | power, full | P1       | ✅ (correctly rounded)                                                                                                     |
+| `pow`     | I     | `pow` (aliases `power`, `toPower`)     | instance `toPower` (alias `pow`); dezi drops static `Decimal.pow(base, exponent)`                                                      | power, full | P2       | ✅ (exponentiation by squaring; exact while the result fits working digits, rounded beyond; fractional via `exp(y·ln(x))`) |
+| `cbrt`    | I     | `cbrt`                                 | instance `cubeRoot` (alias `cbrt`); dezi drops static `Decimal.cbrt(x)`                                                                | power, full | P2       | ✅ (correctly rounded, sign-preserving)                                                                                    |
+| `exp`     | I     | `exp`                                  | instance `naturalExponential` (alias `exp`); dezi drops static `Decimal.exp(x)`                                                        | power, full | P2       | ✅ (reduction + Taylor; certain-overflow pre-check)                                                                        |
+| `ln`      | I     | `ln`                                   | instance `naturalLogarithm` (alias `ln`); dezi drops static `Decimal.ln(x)`                                                            | power, full | P2       | ✅ (reduction + series; see design note 7)                                                                                 |
+| `log`     | I     | `log(base?)` + statics `log2`, `log10` | instance `logarithm` (alias `log`; default base 10); dezi drops statics `Decimal.log(x, base?)`, `Decimal.log2(x)`, `Decimal.log10(x)` | power, full | P2       | ✅ (via ln + divide; default base 10)                                                                                      |
+| `hypot`   | S     | `hypot(...values)`                     | static `Decimal.hypot(x, y, ...)`                                                                                                      | power, full | P2       | ✅ (exact sum of squares, sqrt-rolled)                                                                                     |
 
 #### Trigonometric
 
@@ -146,10 +147,10 @@ All precision-based; domain violations throw.
 
 #### Digit counts
 
-| Extension            | Sides | dezi name (aliases)                              | decimal.js name                                               | Presets                | Priority | Status                                             |
-| -------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------- | ---------------------- | -------- | -------------------------------------------------- |
-| `decimal-places`     | I     | `decimalPlaces()` (alias `dp`)                   | instance `decimalPlaces` (alias `dp`); no static              | rounding, format, full | P2       | ⬜ (number of digits after the point)              |
-| `significant-digits` | I     | `significantDigits(includeZeroes?)` (alias `sd`) | instance `precision([include_zeros])` (alias `sd`); no static | rounding, format, full | P2       | ⬜ (name TBD vs future `Decimal.precision` config) |
+| Extension            | Sides | dezi name (aliases)                | decimal.js name                                               | Presets                | Priority | Status                                                            |
+| -------------------- | ----- | ---------------------------------- | ------------------------------------------------------------- | ---------------------- | -------- | ----------------------------------------------------------------- |
+| `decimal-places`     | I     | `decimalPlaces()` (alias `dp`)     | instance `decimalPlaces` (alias `dp`); no static              | rounding, format, full | P2       | ✅ (number of digits after the point)                             |
+| `significant-digits` | I     | `significantDigits()` (alias `sd`) | instance `precision([include_zeros])` (alias `sd`); no static | rounding, format, full | P2       | ✅ (parameter-less: normalized values never carry trailing zeros) |
 
 ### src/format
 
@@ -161,8 +162,8 @@ All precision-based; domain violations throw.
 | `to-plain-string` | I     | `toPlainString(fractionDigits?)` | — (always-plain form reached via `toFixed()`); no static                                                 | format, basic, full    | P0       | ✅                                        |
 | `to-number`       | I     | `toNumber`                       | instance `toNumber`; no static                                                                           | format, full           | P1       | ✅ (precision loss documented)            |
 | `to-fixed`        | I     | `toFixed(dp?, mode?)`            | instance `toFixed(dp?, rm?)`; no static                                                                  | rounding, format, full | P1       | ✅ (omitted `dp` → exact plain expansion) |
-| `to-exponential`  | I     | `toExponential(dp?, rm?)`        | instance `toExponential(dp?, rm?)`; no static                                                            | format, full           | P2       | ⬜ (reuses `utils/string.ts`)             |
-| `to-precision`    | I     | `toPrecision(sd?, rm?)`          | instance `toPrecision(sd?, rm?)`; no static                                                              | format, full           | P2       | ⬜                                        |
+| `to-exponential`  | I     | `toExponential(dp?, rm?)`        | instance `toExponential(dp?, rm?)`; no static                                                            | format, full           | P2       | ✅ (reuses `utils/string.ts`)             |
+| `to-precision`    | I     | `toPrecision(sd?, rm?)`          | instance `toPrecision(sd?, rm?)`; no static                                                              | format, full           | P2       | ✅                                        |
 | `to-json`         | I     | `toJSON`                         | instance `toJSON` (= `valueOf`); no static                                                               | format, full           | P3       | ⬜                                        |
 | `value-of`        | I     | `valueOf`                        | instance `valueOf` (like `toString` but keeps `−0`; dezi ≡ `toString`); no static                        | format, full           | P3       | ⬜                                        |
 | `to-fraction`     | I     | `toFraction(maxDenominator?)`    | instance `toFraction(max_denominator?)` → `[Decimal, Decimal]`; dezi plans `[bigint, bigint]`; no static | format, full           | P3       | ⬜                                        |
@@ -183,6 +184,7 @@ Input side: decimal.js's constructor also parses `0x`/`0b`/`0o` strings (with `p
 | -------------- | ----- | ------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------ | -------- | ---------------------------------------------------------------- |
 | rounding modes | S     | `rounding: RoundingMode` + exported `type RoundingMode` | `ROUND_UP` … `ROUND_HALF_FLOOR` constants + `rounding` config (`EUCLID` is not a mode) | config, full | P0       | ✅ (dezi replaces the numeric constants with a string union)     |
 | `precision`    | S     | `precision`                                             | `precision` config (1..1e9)                                                            | config, full | P0       | ✅ (needed by `divide`)                                          |
+| `ln10`         | S     | `ln10`                                                  | static `LN10` (a Decimal value; internal range checks)                                 | config, full | P2       | ✅ (overrideable like `precision`)                               |
 | `set`          | S     | `set(props)`                                            | static `Decimal.set(object)`                                                           | config, full | P3       | ⬜ (validates and assigns config, `defaults: true` support)      |
 | `clone`        | S     | `clone(props?)`                                         | static `Decimal.clone(object)`                                                         | config, full | P3       | ⬜ (open design question — note 3)                               |
 | `random`       | S     | `random(dp?)`                                           | static `Decimal.random(dp?)`                                                           | config, full | P3       | ⬜ (`dp` defaults to `precision`; `crypto`-source decision note) |
@@ -198,13 +200,13 @@ The rounding modes: `RoundingMode = "up" | "down" | "ceil" | "floor" | "half-up"
 | `predicate` ✅  | comparison sugar + booleans + `sign`                          | P1       |
 | `rounding`      | quantization family + modes                                   | P1       |
 | `format` ✅     | string/number conversions                                     | P1       |
-| `power`         | roots, powers, exp/log family                                 | P2       |
+| `power` ✅      | roots, powers, exp/log family                                 | P2       |
 | `trigonometric` | trig + inverse trig                                           | P3       |
 | `hyperbolic`    | hyperbolic + inverse                                          | P3       |
 | `bases`         | binary/octal/hexadecimal conversion                           | P3       |
 | `config` ✅     | config statics (modes, `precision`, `set`, `clone`, `random`) | P3       |
 
-All ten preset files exist in `src/preset/` and build to `dist/preset/*`. The ones marked ✅ import live extensions today (with planned extensions noted in-file); `rounding`, `power`, `trigonometric`, `hyperbolic` and `bases` are documented placeholders (currently no-ops) that fill up as their families land.
+All ten preset files exist in `src/preset/` and build to `dist/preset/*`. The ones marked ✅ import live extensions today; `trigonometric`, `hyperbolic` and `bases` remain documented placeholders (no-ops) that fill up as their families land.
 
 Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports so consumers can still import single extensions instead (`./ops/plus`, `./check/compare`, `./format/to-string`, `./config/precision`, …).
 
@@ -216,6 +218,7 @@ Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports 
    - `rounding` → `Decimal.rounding: RoundingMode` ✅ (string union instead of numeric constants; needed by the whole rounding/format family)
    - `minE` / `maxE` → `Decimal.exponentLimit` (dezi-native, single symmetric limit) ✅
    - `toExpNeg` / `toExpPos` (exponential-notation thresholds) → `Decimal.minPlainExponent` / `Decimal.maxPlainExponent` (owned by the `to-string` extension) ✅
+   - `LN10` (internal 1025-digit constant) → `Decimal.ln10` (overrideable config static; feeds range checks, not result rounding) ✅
    - `modulo` (mode used by modulo division — decimal.js's EUCLID slot) → ⬜ P3
    - `crypto` (entropy source for `random`) → ⬜ P3
    - `noConflict()` → excluded (UMD-era global cleanup, meaningless for ESM)
@@ -223,17 +226,17 @@ Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports 
 4. **Naming & alias policy.** dezi picks its own consistent verb-style names instead of inheriting decimal.js's mixed scheme (short operator names `plus`/`minus`/`times`, participles like `dividedBy`, descriptives like `squareRoot`/`toPower`). Rules: primaries are short verbs (`divide`, `pow`, `sqrt`, `negate`), boolean predicates drop decimal.js's trailing `To` (`lessThanOrEqual`, not `lessThanOrEqualTo`), and aliases are shorter equivalents without filler words (`div`, `sub`, `gt`). decimal.js names stay in the tables only as parity-audit references; conversion methods keep the JS-native `to*` family (`toString`, `toFixed`, …).
 5. **Static surface policy.** Statics are the exception, not the rule: they exist only for operations that have no instance receiver (aggregators `max`, `min`, `sum`, `hypot` and `arctan2` ship static-only, like decimal.js) and for a small two-sided allowlist (`compare`, which set the precedent). dezi does **not** provide static mirrors of instance operations — decimal.js's `Decimal.add(x, y)`-style surface is a deliberate parity delta; the instance method is the API.
 6. **Instance property surface.** decimal.js instances expose internal fields `d`/`e`/`s` (digits array, exponent, sign, all best treated read-only). dezi instances expose `coefficient`, `exponent` and `raw`, which cover the same information; `d`/`e`/`s` aliases are not planned.
-7. **Transcendental digit limits.** decimal.js's internal `LN10` and `PI` constants carry 1025 digits, so `ln`/trig results are only correctly rounded up to roughly 1000 digits (max result precision ≈ 1000 − argument precision for trig). dezi inherits equivalent constraints when these families land; document as footnotes rather than behavior differences.
+7. **Transcendental digit limits.** decimal.js's internal `LN10` and `PI` constants carry 1025 digits, so `ln`/trig results are only correctly rounded up to roughly 1000 digits (max result precision ≈ 1000 − argument precision for trig). dezi's `ln`/`exp` compute from reduction + series at working precision, so no constant-imposed ceiling applies; the `ln10` config static feeds only the range checks. Trig (P3) will inherit decimal.js's `PI`-style constraints; document as footnotes rather than behavior differences.
 8. **Every extension ships with:** its `declare module "dezi"` augmentation (one block per file, containing both interfaces and any exported types), `extend()`/`extendStatic()` registration, side-effect imports of dependencies, unit tests, and no new folders beyond `src/ops/`, `src/check/`, `src/format/`, `src/config/`, `src/preset/`, and `test/` mirrors (`src/parse/` may join if radix input lands).
 
 ## Milestones
 
 - **v0.1 — Arithmetic core complete (P0).** ✅ Rounding modes + `precision`, `divide`, plus presets scaffolded; remaining: README docs on exact vs precision-based ops.
 - **v0.2 — Everyday usability (P1).** ✅ Quantization family (`floor`/`ceil`/`truncate`/`round`/`to-decimal-places`/`clamp`), `to-fixed`/`to-number`, comparison sugar + booleans + `sign`, `max`/`min`/`sum`, `sqrt`; `predicate`/`rounding`/`format` presets filled (only `to-nearest` deferred to P2).
-- **v0.3 — Advanced math (P2).** `pow`, `cbrt`, `exp`, `ln`, `log`, `to-significant-digits`, `to-exponential`, `to-precision`; `power` preset.
+- **v0.3 — Advanced math (P2).** ✅ `pow`, `cbrt`, `exp`, `ln`, `log`, `hypot`, `to-nearest`, `to-significant-digits`, digit counts (`decimal-places`, `significant-digits`), `to-exponential`/`to-precision`; `power` preset filled; `ln10` config static.
 - **v0.4 — Transcendental completeness (P3).** Trigonometric + hyperbolic families; `trigonometric`/`hyperbolic` presets.
 - **v0.5 — Configuration & parity audit (P3).** `config` extensions (`set`, `clone` decision, `random` + entropy source), base-radix conversions, `to-fraction`/`to-json`/`value-of`, and a full parity audit against the decimal.js method list.
 
 ---
 
-Status: 35 of 69 planned extension modules shipped, grouped into 10 presets.
+Status: 49 of 71 planned extension modules shipped, grouped into 10 presets.

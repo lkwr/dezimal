@@ -28,4 +28,10 @@ describe("presets", () => {
 		expect(Decimal.precision).toBe(20);
 		expect(Decimal.rounding).toBe("half-up");
 	});
+
+	it("expose the power family", () => {
+		expect(new Decimal(2).pow(10).raw).toEqual([1024n, 0]);
+		expect(new Decimal(9).sqrt().raw).toEqual([3n, 0]);
+		expect(Decimal.hypot(3, 4).raw).toEqual([5n, 0]);
+	});
 });

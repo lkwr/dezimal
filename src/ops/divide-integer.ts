@@ -1,5 +1,5 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
-import { abs, normalize } from "../utils/common.ts";
+import { digitsOf, normalize } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { truncDivide } from "../utils/integer-division.ts";
 import { parse } from "../utils/parse.ts";
@@ -55,7 +55,7 @@ const divideIntegers = (self: DecimalLike, other: DecimalLike): Decimal => {
 	// significant means quantizing onto the 10^(digits + exponent - precision)
 	// grid. When digits <= precision the target sits at or below the quotient's
 	// exponent and roundToScale's on-grid early return keeps the value as-is.
-	const digits = abs(coefficient).toString().length;
+	const digits = digitsOf(coefficient);
 	return new Decimal(
 		roundToScale(
 			quotient,

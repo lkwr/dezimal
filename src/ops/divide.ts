@@ -1,8 +1,8 @@
-import type { RoundingMode } from "dezi";
 import { Decimal, type DecimalLike } from "../decimal.ts";
-import { abs, normalize, pow10 } from "../utils/common.ts";
+import { abs, digitsOf, normalize, pow10 } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
+import { roundingIncrement } from "../utils/rounding.ts";
 
 // required extensions
 import "../config/precision.ts";
@@ -50,8 +50,8 @@ const divideDecimals = (self: DecimalLike, other: DecimalLike): Decimal => {
 	// counts: v lies in (10^(exponent-1), 10^(exponent+1)), and only the lower
 	// edge can ever need adjusting, so one comparison pins v into
 	// [10^exponent, 10^(exponent+1)).
-	const dA = A.toString().length;
-	const dB = B.toString().length;
+	const dA = digitsOf(A);
+	const dB = digitsOf(B);
 	let exponent = ea - eb + dA - dB;
 	if (dA >= dB) {
 		if (A < B * pow10(dA - dB)) exponent -= 1;
@@ -88,44 +88,22 @@ const divideDecimals = (self: DecimalLike, other: DecimalLike): Decimal => {
 	// BigInt division truncated the ideal quotient; the discarded part (halfway
 	// = remainder * 2 vs denominator) drives the configured rounding mode, and
 	// "positive"/"negative" refer to the result coefficient's sign.
-	const mode: RoundingMode = Decimal.rounding;
 	const discarded = remainder > 0n;
 	const overHalf = remainder * 2n > denominator;
 	const atHalf = remainder * 2n === denominator;
-	const positive = sign > 0n;
-	const negative = sign < 0n;
 
-	let increment: boolean;
-	switch (mode) {
-		case "up":
-			increment = discarded;
-			break;
-		case "down":
-			increment = false;
-			break;
-		case "ceil":
-			increment = discarded && positive;
-			break;
-		case "floor":
-			increment = discarded && negative;
-			break;
-		case "half-up":
-			increment = overHalf || atHalf;
-			break;
-		case "half-down":
-			increment = overHalf;
-			break;
-		case "half-even":
-			increment = overHalf || (atHalf && (quotient & 1n) === 1n);
-			break;
-		case "half-ceil":
-			increment = overHalf || (atHalf && positive);
-			break;
-		case "half-floor":
-			increment = overHalf || (atHalf && negative);
-			break;
+	if (
+		roundingIncrement(Decimal.rounding, {
+			discarded,
+			overHalf,
+			atHalf,
+			isOdd: (quotient & 1n) === 1n,
+			positive: sign > 0n,
+			negative: sign < 0n,
+		})
+	) {
+		quotient += 1n;
 	}
-	if (increment) quotient += 1n;
 
 	// Rounding may carry into a fresh power of ten (9.99..9 -> 1000..0), which
 	// normalize() absorbs before the final range guard.

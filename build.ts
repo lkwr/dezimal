@@ -35,4 +35,5 @@ await build({
 	clean: true,
 	format: "esm",
 	platform: "neutral",
+	minify: { compress: true, mangle: { keepNames: true } },
 });
