@@ -26,6 +26,9 @@ jobs:
       - name: Test
         run: pnpm run test
 
+      - name: Benchmark
+        run: pnpm run bench
+
       - name: Build
         run: pnpm run build
 

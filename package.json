@@ -10,7 +10,8 @@
 	"scripts": {
 		"build": "tsc --noEmit && node build.ts",
 		"test": "vitest",
-		"size": "node scripts/bundle-size.ts"
+		"size": "node scripts/bundle-size.ts",
+		"bench": "vitest bench"
 	},
 
 	"repository": {

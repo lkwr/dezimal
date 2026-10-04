@@ -1,9 +1,7 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
+import { addRaw } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
-
-// required extensions
-import "./plus.ts";
-import "./negate.ts";
+import { parse } from "../utils/parse.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -16,7 +14,10 @@ declare module "dezi" {
 extend(
 	"minus",
 	function minus(this: Decimal, input: DecimalLike): Decimal {
-		return this.add(new Decimal(input).negate());
+		const [coefficient, exponent] = parse(input);
+		return new Decimal(
+			addRaw([this.coefficient, this.exponent], [-coefficient, exponent]),
+		);
 	},
 	["sub", "subtract"],
 );

@@ -15,7 +15,7 @@ Every operation is a small, tree-shakeable module under `src/ops/`, `src/check/`
   - an instance method (`Decimal.prototype.<name>`), and — only for receiver-less operations (`max`, `min`, `sum`, `hypot`, `arctan2`, `sign`) and the short two-sided allowlist (`compare`) — a static method or constant (`Decimal.<name>`).
     Each side is declared type-wise with its own `interface Decimal` / `interface DecimalConstructor` section inside a single `declare module "dezi"` block, so importing the extension is what makes it typecheck everywhere.
 - **Presets** — side-effect bundles in `src/preset/<name>.ts` that only import extensions. Extensions may belong to several presets (overlap is normal; registration is idempotent). Presets are exported as `./preset/<name>` subpaths.
-- **Dependencies** — an extension that needs another extension's method calls it through a side-effect import (see `minus.ts` → `plus.ts`, `negate.ts`; `divide.ts` → `config/precision.ts`, `config/rounding-modes.ts`). Extensions never rely on methods that aren't imported or built in.
+- **Dependencies** — an extension that needs another extension's method calls it through a side-effect import (see `divide.ts` → `config/precision.ts`, `config/rounding-modes.ts`). Extensions never rely on methods that aren't imported or built in.
 - **Priority legend** — `P0` immediate core (blocks release) · `P1` everyday usability · `P2` advanced but expected · `P3` niche/exotic.
 - **Status** — ✅ shipped · ⬜ planned.
 - **Table columns** — "dezi name" lists the method name(s) dezi plans to expose (primary + aliases); "decimal.js name" documents only what decimal.js calls it, for the parity audit.
@@ -43,16 +43,16 @@ Priority is per extension; the tables are the working checklist. The preset colu
 
 #### Arithmetic
 
-| Extension        | Sides | dezi name (aliases)                 | decimal.js name                                                           | Presets     | Priority | Status                         |
-| ---------------- | ----- | ----------------------------------- | ------------------------------------------------------------------------- | ----------- | -------- | ------------------------------ |
-| `plus`           | I     | `plus` (alias `add`)                | instance `plus` (alias `add`); dezi drops static `Decimal.add(x, y)`      | basic, full | P0       | ✅                             |
-| `minus`          | I     | `minus` (aliases `sub`, `subtract`) | instance `minus` (alias `sub`); dezi drops static `Decimal.sub(x, y)`     | basic, full | P0       | ✅ (requires `plus`, `negate`) |
-| `times`          | I     | `times` (aliases `mul`, `multiply`) | instance `times` (alias `mul`); dezi drops static `Decimal.mul(x, y)`     | basic, full | P0       | ✅                             |
-| `absolute`       | I     | `absolute` (alias `abs`)            | instance `absoluteValue` (alias `abs`); no static                         | basic, full | P0       | ✅                             |
-| `negate`         | I     | `negate`                            | instance `negated` (alias `neg`); no static                               | basic, full | P0       | ✅                             |
-| `divide`         | I     | `divide` (alias `div`)              | instance `dividedBy` (alias `div`); dezi drops static `Decimal.div(x, y)` | basic, full | P0       | ✅                             |
-| `divide-integer` | I     | `divideInteger` (alias `divToInt`)  | instance `dividedToIntegerBy` (alias `divToInt`); no static               | basic, full | P1       | ✅                             |
-| `modulo`         | I     | `modulo` (alias `mod`)              | instance `modulo` (alias `mod`); dezi drops static `Decimal.mod(x, y)`    | basic, full | P1       | ✅                             |
+| Extension        | Sides | dezi name (aliases)                 | decimal.js name                                                           | Presets     | Priority | Status |
+| ---------------- | ----- | ----------------------------------- | ------------------------------------------------------------------------- | ----------- | -------- | ------ |
+| `plus`           | I     | `plus` (alias `add`)                | instance `plus` (alias `add`); dezi drops static `Decimal.add(x, y)`      | basic, full | P0       | ✅     |
+| `minus`          | I     | `minus` (aliases `sub`, `subtract`) | instance `minus` (alias `sub`); dezi drops static `Decimal.sub(x, y)`     | basic, full | P0       | ✅     |
+| `times`          | I     | `times` (aliases `mul`, `multiply`) | instance `times` (alias `mul`); dezi drops static `Decimal.mul(x, y)`     | basic, full | P0       | ✅     |
+| `absolute`       | I     | `absolute` (alias `abs`)            | instance `absoluteValue` (alias `abs`); no static                         | basic, full | P0       | ✅     |
+| `negate`         | I     | `negate`                            | instance `negated` (alias `neg`); no static                               | basic, full | P0       | ✅     |
+| `divide`         | I     | `divide` (alias `div`)              | instance `dividedBy` (alias `div`); dezi drops static `Decimal.div(x, y)` | basic, full | P0       | ✅     |
+| `divide-integer` | I     | `divideInteger` (alias `divToInt`)  | instance `dividedToIntegerBy` (alias `divToInt`); no static               | basic, full | P1       | ✅     |
+| `modulo`         | I     | `modulo` (alias `mod`)              | instance `modulo` (alias `mod`); dezi drops static `Decimal.mod(x, y)`    | basic, full | P1       | ✅     |
 
 Notes:
 

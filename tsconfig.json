@@ -24,12 +24,13 @@
 		"skipLibCheck": true,
 
 		"paths": {
-			"dezi": ["./src/decimal.ts"],
+			"dezi": ["./src/index.ts"],
 			"dezi/ops/*": ["./src/preset/*.ts"],
 			"dezi/check/*": ["./src/check/*.ts"],
 			"dezi/format/*": ["./src/format/*.ts"],
 			"dezi/config/*": ["./src/config/*.ts"],
 			"dezi/preset/*": ["./src/preset/*.ts"]
 		}
-	}
+	},
+	"include": ["./src/**/*.ts", "./test/**/*.ts", "./scripts/*.ts", "./build.ts"]
 }
