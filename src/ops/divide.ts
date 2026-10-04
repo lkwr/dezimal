@@ -4,8 +4,7 @@ import { abs, normalize, pow10 } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
-// divide is precision-based: it reads the config statics registered by these
-// two extensions.
+// required extensions
 import "../config/precision.ts";
 import "../config/rounding-modes.ts";
 

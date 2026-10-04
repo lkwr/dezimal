@@ -31,12 +31,15 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
 - Static methods are the exception: only receiver-less operations (`max`, `min`, `sum`, `hypot`, `arctan2`, `sign`) and the two-sided `compare` allowlist. No `Decimal.add(x, y)`-style mirrors of instance ops.
 - Arithmetic family is exact (bigints); divide/transcendental ops are precision-based: they round to `Decimal.precision` significant digits using `Decimal.rounding` (a string-union `RoundingMode`, default `"half-up"`).
 - Naming: verb primaries without filler words (`divide`, not `dividedBy`; `lessThanOrEqual`, not `lessThanOrEqualTo`), short aliases (`div`, `sub`, `gt`). decimal.js names appear in ROADMAP tables as parity-audit references only.
+- Public API signatures use meaningful parameter names, never generic single letters (`sign(value)`, not `sign(x)`; explicit pairs like `compare(a, b)` are fine). Variadic value lists use `...values`.
+- JSDoc describes dezi's behavior in its own terms; never mention decimal.js in JSDoc. Internal file comments may reference decimal.js for design context.
 
 ## Workflow for a new extension
 
 1. One file in the right folder, one test mirrored in `test/<folder>/` (vitest, imports the extension for side effects).
-2. Augmentation block, `extend()`/`extendStatic()` registration, side-effect imports of dependencies, JSDoc on public members.
+2. Augmentation block, `extend()`/`extendStatic()` registration, side-effect imports of dependencies (last import lines, after a blank line, under the comment `// required extensions`), JSDoc on public members.
 3. Update the `ROADMAP.md` status column; add the extension to presets only when asked.
 4. When asked to implement several extensions, use one subagent per extension (their file sets are disjoint).
 5. Validate with `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`, `./node_modules/.bin/biome check src test`, and `node build.ts`.
-6. Style: tabs, double quotes, biome-clean, `import type` for type-only imports.
+
+- Style: tabs, double quotes, biome-clean, `import type` for type-only imports. Use `type` for type declarations; `interface` only where declaration merging requires it: the `Decimal`/`DecimalConstructor` targets in `src/decimal.ts` and inside `declare module "dezi"` blocks.

@@ -1,1 +1,11 @@
 import "../check/compare.ts";
+import "../check/equals.ts";
+import "../check/greater-than-or-equal.ts";
+import "../check/greater-than.ts";
+import "../check/is-integer.ts";
+import "../check/is-negative.ts";
+import "../check/is-positive.ts";
+import "../check/is-zero.ts";
+import "../check/less-than-or-equal.ts";
+import "../check/less-than.ts";
+import "../check/sign.ts";

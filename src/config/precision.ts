@@ -10,7 +10,7 @@ declare module "dezi" {
 		 * Maximum number of significant digits kept by precision-based (inexact)
 		 * operations such as division, roots and logarithms. Valid range is
 		 * 1..1e9; validation is provided by a future `set()` extension, and
-		 * direct assignment bypasses validation (mirroring decimal.js).
+		 * direct assignment bypasses validation.
 		 */
 		precision: number;
 	}

@@ -1,0 +1,16 @@
+import { Decimal } from "../decimal.ts";
+import { extend } from "../utils/extend.ts";
+import { roundToScale } from "../utils/rounding.ts";
+
+declare module "dezi" {
+	interface Decimal {
+		/** Returns the smallest integer greater than or equal to this value. */
+		ceil(): Decimal;
+	}
+}
+
+extend("ceil", function ceil(this: Decimal): Decimal {
+	return new Decimal(
+		roundToScale([this.coefficient, this.exponent], 0, "ceil"),
+	);
+});

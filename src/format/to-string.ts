@@ -3,6 +3,7 @@ import { abs } from "../utils/common.ts";
 import { extend, extendStatic } from "../utils/extend.ts";
 import { exponentialString } from "../utils/string.ts";
 
+// required extensions
 import "./to-plain-string.ts";
 
 // Notation thresholds are owned by this extension: only formatting needs to

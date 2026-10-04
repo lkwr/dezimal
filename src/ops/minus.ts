@@ -1,7 +1,7 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
 import { extend } from "../utils/extend.ts";
 
-// required ops
+// required extensions
 import "./plus.ts";
 import "./negate.ts";
 
