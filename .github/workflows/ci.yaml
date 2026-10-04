@@ -28,3 +28,13 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Bundle size
+        run: |
+          set -o pipefail
+          {
+            echo "## Bundle size"
+            echo '```'
+            pnpm run size
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
