@@ -1,0 +1,30 @@
+name: "Test & Build"
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          version: 12
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Biome (lint/format)
+        run: pnpm biome ci
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
