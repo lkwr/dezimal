@@ -4,7 +4,7 @@ import { extend } from "../utils/extend.ts";
 // required extensions
 import "../check/compare.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns this value clamped to the interval between `min` and `max`;

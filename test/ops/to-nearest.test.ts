@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { describe, expect, it } from "vitest";
 import {
 	Decimal,
@@ -237,7 +237,7 @@ describe("toNearest", () => {
 	});
 
 	it("registers no aliases", () => {
-		// decimal.js also answers to `toClosest`; dezi keeps a single name
+		// decimal.js also answers to `toClosest`; dezimal keeps a single name
 		const instance = new Decimal(1) as unknown as {
 			toNearest?: unknown;
 			toClosest?: unknown;

@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import type { RawDecimal } from "../decimal.ts";
 import { abs, addRaw, digitsOf, normalize, pow10 } from "./common.ts";
 

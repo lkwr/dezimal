@@ -27,7 +27,7 @@ describe("isNegative", () => {
 		expect(isNegative(0n)).toBe(false);
 		expect(isNegative("0")).toBe(false);
 		expect(isNegative("0.0")).toBe(false);
-		// dezi has no -0: "-0" normalizes to [0n, 0]
+		// dezimal has no -0: "-0" normalizes to [0n, 0]
 		expect(isNegative("-0")).toBe(false);
 		expect(isNegative([0n, 0] satisfies RawDecimal)).toBe(false);
 	});

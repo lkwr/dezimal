@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { afterEach, describe, expect, it } from "vitest";
 import { Decimal } from "../../src/decimal.ts";
 import { currentPrecision, currentRounding } from "../../src/utils/config.ts";

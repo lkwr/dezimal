@@ -26,7 +26,7 @@ describe("sum (static)", () => {
 	});
 
 	it("adds decimals with different exponents exactly", () => {
-		// JS double addition yields 0.1 + 0.2 = 0.30000000000000004; dezi is exact
+		// JS double addition yields 0.1 + 0.2 = 0.30000000000000004; dezimal is exact
 		expect(sum("0.1", "0.2")).toEqual([3n, -1]);
 	});
 

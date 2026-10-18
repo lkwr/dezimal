@@ -29,7 +29,7 @@ describe("toFixed", () => {
 	});
 
 	it("rounds negatives onto zero without a sign", () => {
-		// -0.0001 rounds down to zero at 2 dp; dezi has no signed zero, so
+		// -0.0001 rounds down to zero at 2 dp; dezimal has no signed zero, so
 		// the result is "0.00", not "-0.00".
 		expect(new Decimal("-0.0001").toFixed(2)).toBe("0.00");
 	});

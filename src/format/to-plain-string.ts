@@ -3,7 +3,7 @@ import { abs } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { plainString } from "../utils/string.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the exact value in plain (non-exponential) notation. With

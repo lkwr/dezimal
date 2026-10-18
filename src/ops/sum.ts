@@ -4,12 +4,12 @@ import { extendStatic } from "../utils/extend.ts";
 // required extensions
 import "./plus.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/**
 		 * Returns the sum of the given values, computed exactly.
 		 */
-		sum(...values: DecimalLike[]): import("dezi").Decimal;
+		sum(...values: DecimalLike[]): import("dezimal").Decimal;
 	}
 }
 

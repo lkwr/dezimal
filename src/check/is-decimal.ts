@@ -1,10 +1,10 @@
 import { Decimal } from "../decimal.ts";
 import { extendStatic } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/** Returns whether the value is a Decimal instance. */
-		isDecimal(value: unknown): value is import("dezi").Decimal;
+		isDecimal(value: unknown): value is import("dezimal").Decimal;
 	}
 }
 

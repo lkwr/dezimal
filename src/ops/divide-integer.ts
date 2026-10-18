@@ -1,4 +1,4 @@
-import type { PrecisionOptions } from "dezi";
+import type { PrecisionOptions } from "dezimal";
 import { Decimal, type DecimalLike } from "../decimal.ts";
 import { currentPrecision, currentRounding } from "../utils/config.ts";
 import { truncDivide } from "../utils/division.ts";
@@ -9,7 +9,7 @@ import { roundToPrecision } from "../utils/rounding.ts";
 // required extensions
 import "../config/precision.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the integer part of the division, truncated towards zero,

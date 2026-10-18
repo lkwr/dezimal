@@ -4,7 +4,7 @@ import { extend } from "../utils/extend.ts";
 // required extensions
 import "./to-string.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the same string as `toString()`, so `JSON.stringify`

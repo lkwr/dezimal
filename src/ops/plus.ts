@@ -3,7 +3,7 @@ import { addRaw } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		plus(other: DecimalLike): Decimal;
 		add(other: DecimalLike): Decimal;

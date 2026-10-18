@@ -30,7 +30,7 @@ jobs:
         run: |
           set -o pipefail
           {
-            echo "## Benchmark (dezi vs decimal.js)"
+            echo "## Benchmark (dezimal vs decimal.js)"
             echo '```'
             pnpm run bench
             echo '```'

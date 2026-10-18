@@ -2,7 +2,7 @@ import { Decimal, type DecimalLike } from "../decimal.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		times(other: DecimalLike): Decimal;
 		mul(other: DecimalLike): Decimal;

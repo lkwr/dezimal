@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import type { Decimal } from "../decimal.ts";
 import { abs, digitsOf } from "../utils/common.ts";
 import { currentRounding } from "../utils/config.ts";
@@ -9,7 +9,7 @@ import { exponentialString } from "../utils/string.ts";
 // required extensions
 import "../config/rounding-modes.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the value in exponential notation with `dp` digits after the

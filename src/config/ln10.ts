@@ -5,7 +5,7 @@ import { extendStatic } from "../utils/extend.ts";
 // the ln10 extension, and the exponential/logarithmic extensions (exp, ln)
 // import this module. Like `Decimal.precision` it is user-mutable without
 // validation until a `set()` extension.
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/**
 		 * The natural logarithm of 10, pinned as a Decimal. Range checks in the
@@ -13,7 +13,7 @@ declare module "dezi" {
 		 * exact bigint comparisons; override it like `Decimal.precision` to
 		 * raise the pinned digits.
 		 */
-		ln10: import("dezi").Decimal;
+		ln10: import("dezimal").Decimal;
 	}
 }
 

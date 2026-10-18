@@ -36,11 +36,11 @@ const presets = readdirSync(resolve(distDir, "preset"))
 	.map((name) => name.replace(/\.js$/, ""))
 	.sort();
 
-const VIRTUAL_ID = "\0dezi-preset-entry";
+const VIRTUAL_ID = "\0dezimal-preset-entry";
 
 function presetEntryPlugin(presetFile: string): Plugin {
 	return {
-		name: "dezi-bundle-size",
+		name: "dezimal-bundle-size",
 		resolveId(source) {
 			if (source === VIRTUAL_ID) {
 				return VIRTUAL_ID;
@@ -177,7 +177,7 @@ const line = (row: Row) =>
 	].join(gap);
 
 console.log(
-	bold("dezi bundle size") +
+	bold("dezimal bundle size") +
 		" " +
 		dim("(rolldown, esm, platform neutral; kB = 1000 bytes)"),
 );

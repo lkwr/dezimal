@@ -3,7 +3,7 @@ import { truncDivide } from "../utils/division.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the remainder of this value divided by `other`, carrying the

@@ -1,7 +1,7 @@
 import type { Decimal } from "../decimal.ts";
 import { extend } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the number of digits after the decimal point. Stored values

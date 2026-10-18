@@ -7,7 +7,7 @@ import { extendStatic } from "../utils/extend.ts";
 // required extensions
 import "./rounding-modes.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	/**
 	 * Per-call overrides for precision-based operations, e.g.
 	 * `x.divide(3, { precision: 50 })`. Omitted fields fall back to

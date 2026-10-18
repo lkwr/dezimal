@@ -3,7 +3,7 @@ import { digitsOf, pow10 } from "../utils/common.ts";
 import { extend, extendStatic } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/** Returns -1, 0 or 1 as this value is smaller than, equal to or bigger than `other`. */
 		compare(other: DecimalLike): -1 | 0 | 1;

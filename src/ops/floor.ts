@@ -2,7 +2,7 @@ import { Decimal } from "../decimal.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/** Returns the largest integer less than or equal to this value. */
 		floor(): Decimal;

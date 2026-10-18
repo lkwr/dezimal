@@ -1,5 +1,5 @@
 {
-	"name": "dezi",
+	"name": "dezimal",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -18,11 +18,11 @@
 
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/lkwr/dezi.git"
+		"url": "git+https://github.com/lkwr/dezimal.git"
 	},
-	"homepage": "https://github.com/lkwr/dezi",
+	"homepage": "https://github.com/lkwr/dezimal",
 	"bugs": {
-		"url": "https://github.com/lkwr/dezi/issues"
+		"url": "https://github.com/lkwr/dezimal/issues"
 	},
 	"keywords": [
 		"decimal",

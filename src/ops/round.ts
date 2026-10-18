@@ -6,7 +6,7 @@ import { roundToScale } from "../utils/rounding.ts";
 // required extensions
 import "../config/rounding-modes.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Rounds to the nearest integer using the `Decimal.rounding` mode;

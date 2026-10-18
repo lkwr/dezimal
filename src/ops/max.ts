@@ -4,13 +4,13 @@ import { extendStatic } from "../utils/extend.ts";
 // required extensions
 import "../check/compare.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/**
 		 * Returns the largest of the given values, compared exactly. Throws when
 		 * called without arguments.
 		 */
-		max(...values: DecimalLike[]): import("dezi").Decimal;
+		max(...values: DecimalLike[]): import("dezimal").Decimal;
 	}
 }
 

@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { describe, expect, it } from "vitest";
 import {
 	Decimal,

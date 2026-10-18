@@ -4,7 +4,7 @@ import { extend } from "../utils/extend.ts";
 // required extensions
 import "./compare.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/** Returns true if the value equals `other`. */
 		equals(other: DecimalLike): boolean;

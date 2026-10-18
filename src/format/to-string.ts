@@ -5,7 +5,7 @@ import { exponentialString, plainString } from "../utils/string.ts";
 
 // Notation thresholds are owned by this extension: only formatting needs to
 // decide between plain and exponential output.
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/** Exponents bigger than this are formatted exponentially ("1e+21"). */
 		maxPlainExponent: number;

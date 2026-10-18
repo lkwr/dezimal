@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { Decimal } from "../decimal.ts";
 import { abs, digitsOf } from "../utils/common.ts";
 import { currentRounding } from "../utils/config.ts";
@@ -10,7 +10,7 @@ import { exponentialString, plainString } from "../utils/string.ts";
 import "../config/rounding-modes.ts";
 import "./to-string.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the value rounded to `sd` significant digits using the given
@@ -41,7 +41,7 @@ extend(
 			this.exponent + digitCount - sd,
 			currentRounding(mode),
 		);
-		// dezi has no signed zero, so a zero result is always bare.
+		// dezimal has no signed zero, so a zero result is always bare.
 		if (roundedCoefficient === 0n) {
 			return sd > 1 ? `0.${"0".repeat(sd - 1)}` : "0";
 		}

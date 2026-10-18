@@ -8,7 +8,7 @@ import { parse } from "../utils/parse.ts";
 // required extensions
 import "../config/rounding-modes.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/**
 		 * Returns the square root of the sum of the squares of the given
@@ -16,7 +16,7 @@ declare module "dezi" {
 		 * `Decimal.rounding` mode. The sum of squares is exact and may exceed
 		 * the exponent limit as long as the result does not.
 		 */
-		hypot(...values: DecimalLike[]): import("dezi").Decimal;
+		hypot(...values: DecimalLike[]): import("dezimal").Decimal;
 	}
 }
 

@@ -46,10 +46,10 @@ const options: ts.CompilerOptions = {
 
 const fixture = `
 import assert from "node:assert/strict";
-import { Decimal, type DecimalLike } from "dezi";
-import type { PrecisionOptions, RoundingMode } from "dezi";
-import "dezi/preset/basic";
-import "dezi/ops/sqrt";
+import { Decimal, type DecimalLike } from "dezimal";
+import type { PrecisionOptions, RoundingMode } from "dezimal";
+import "dezimal/preset/basic";
+import "dezimal/ops/sqrt";
 
 const rounding: RoundingMode = "down";
 const options: PrecisionOptions = { precision: 5, rounding };
@@ -96,16 +96,18 @@ const typecheck = (file: string, extra: ts.CompilerOptions = {}): string => {
 	});
 };
 
-const project = mkdtempSync(join(tmpdir(), "dezi-consumer-"));
+const project = mkdtempSync(join(tmpdir(), "dezimal-consumer-"));
 try {
-	cpSync(distDir, join(project, "node_modules", "dezi"), { recursive: true });
+	cpSync(distDir, join(project, "node_modules", "dezimal"), {
+		recursive: true,
+	});
 	writeFileSync(join(project, "package.json"), '{ "type": "module" }\n');
 
 	const subpaths = [
 		...["ops", "check", "format", "config", "preset"].flatMap((kind) =>
 			readdirSync(join(distDir, kind))
 				.filter((name) => name.endsWith(".js"))
-				.map((name) => `dezi/${kind}/${name.slice(0, -3)}`),
+				.map((name) => `dezimal/${kind}/${name.slice(0, -3)}`),
 		),
 	];
 
@@ -114,13 +116,13 @@ try {
 	let errors = "";
 	for (const subpath of subpaths) {
 		const file = join(entries, `${subpath.replaceAll("/", "_")}.ts`);
-		writeFileSync(file, `import "dezi";\nimport "${subpath}";\n`);
+		writeFileSync(file, `import "dezimal";\nimport "${subpath}";\n`);
 		errors += typecheck(file);
 	}
 
 	const fixtureFile = join(project, "fixture.ts");
 	writeFileSync(fixtureFile, fixture);
-	// node types only for node:assert in the fixture; dezi itself needs none.
+	// node types only for node:assert in the fixture; dezimal itself needs none.
 	errors += typecheck(fixtureFile, {
 		typeRoots: [resolve(root, "node_modules/@types")],
 		types: ["node"],

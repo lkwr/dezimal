@@ -4,14 +4,14 @@ import { extendStatic } from "../utils/extend.ts";
 // required extensions
 import "../check/compare.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface DecimalConstructor {
 		/**
 		 * Returns the smallest of the given values, compared exactly.
 		 *
 		 * Throws when called without arguments.
 		 */
-		min(...values: DecimalLike[]): import("dezi").Decimal;
+		min(...values: DecimalLike[]): import("dezimal").Decimal;
 	}
 }
 

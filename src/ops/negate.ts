@@ -1,7 +1,7 @@
 import { Decimal } from "../decimal.ts";
 import { extend } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/** Returns the value with the opposite sign. */
 		negate(): Decimal;

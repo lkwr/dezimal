@@ -2,7 +2,7 @@ import type { Decimal } from "../decimal.ts";
 import { pow10 } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the value as a bigint. Throws a RangeError for values with a

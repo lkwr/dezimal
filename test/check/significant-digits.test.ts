@@ -14,7 +14,7 @@ describe("significantDigits", () => {
 	it("counts zero as one significant digit", () => {
 		expect(new Decimal(0).significantDigits()).toBe(1);
 		expect(new Decimal("0.000").significantDigits()).toBe(1);
-		// dezi has no signed zero: "-0" parses to [0n, 0]
+		// dezimal has no signed zero: "-0" parses to [0n, 0]
 		expect(new Decimal("-0").significantDigits()).toBe(1);
 	});
 

@@ -2,7 +2,7 @@ import { Decimal } from "../decimal.ts";
 import { abs } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/** Returns the value with any sign removed. */
 		abs(): Decimal;

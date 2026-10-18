@@ -1,15 +1,15 @@
-# dezi
+# dezimal
 
 Arbitrary-precision decimal arithmetic for JavaScript and TypeScript: a sub-1 kB core and an opt-in extension for every operation.
 
-_dezi_ is short for _Dezimal_, German for decimal.
+_dezimal_ is German for decimal.
 
 > [!WARNING]
-> dezi is an experiment: it explores how much smaller and more modern a decimal library can be than decimal.js. Almost all of its code was written with AI. It is tested extensively, including against decimal.js, but correctness is not guaranteed — verify results before relying on them for anything critical.
+> dezimal is an experiment: it explores how much smaller and more modern a decimal library can be than decimal.js. Almost all of its code was written with AI. It is tested extensively, including against decimal.js, but correctness is not guaranteed — verify results before relying on them for anything critical.
 
 ```ts
-import { Decimal } from "dezi";
-import "dezi/preset/basic";
+import { Decimal } from "dezimal";
+import "dezimal/preset/basic";
 
 new Decimal("0.1").plus("0.2").toString(); // "0.3"
 ```
@@ -23,19 +23,19 @@ new Decimal("0.1").plus("0.2").toString(); // "0.3"
 ## Install
 
 ```sh
-npm install dezi
+npm install dezimal
 ```
 
-dezi ships as ES modules and relies on `bigint` (ES2020).
+dezimal ships as ES modules and relies on `bigint` (ES2020).
 
 ## Usage
 
 Import the core once and the extensions you need as side-effect imports, usually in your entry file:
 
 ```ts
-import { Decimal } from "dezi";
-import "dezi/preset/basic"; // arithmetic, compare, max/min/sum, toString
-import "dezi/ops/sqrt"; // single extensions work too
+import { Decimal } from "dezimal";
+import "dezimal/preset/basic"; // arithmetic, compare, max/min/sum, toString
+import "dezimal/ops/sqrt"; // single extensions work too
 
 const price = new Decimal("19.99");
 const total = price.times(3).plus("4.95");
@@ -58,22 +58,22 @@ new Decimal([12345n, -2]); // 123.45
 
 | Import | Contents |
 | --- | --- |
-| `dezi/preset/basic` | `plus`, `minus`, `times`, `divide`, `divideInteger`, `modulo`, `absolute`, `negate`, `compare`, `sign`, `max`, `min`, `sum`, `toString`, `toPlainString` |
-| `dezi/preset/predicate` | `equals`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `isZero`, `isInteger`, `isNegative`, `isPositive`, `compare`, `sign` |
-| `dezi/preset/rounding` | `round`, `floor`, `ceil`, `truncate`, `toDecimalPlaces`, `toSignificantDigits`, `toNearest`, `clamp`, `toFixed`, `decimalPlaces`, `significantDigits` |
-| `dezi/preset/power` | `sqrt`, `cbrt`, `pow`, `exp`, `ln`, `log` (+ `Decimal.log2`, `Decimal.log10`), `Decimal.hypot` |
-| `dezi/preset/format` | `toString`, `toPlainString`, `toFixed`, `toExponential`, `toPrecision`, `toNumber`, `decimalPlaces`, `significantDigits` |
-| `dezi/preset/config` | `Decimal.precision`, `Decimal.rounding`, `Decimal.ln10` |
-| `dezi/preset/full` | everything |
+| `dezimal/preset/basic` | `plus`, `minus`, `times`, `divide`, `divideInteger`, `modulo`, `absolute`, `negate`, `compare`, `sign`, `max`, `min`, `sum`, `toString`, `toPlainString` |
+| `dezimal/preset/predicate` | `equals`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `isZero`, `isInteger`, `isNegative`, `isPositive`, `compare`, `sign` |
+| `dezimal/preset/rounding` | `round`, `floor`, `ceil`, `truncate`, `toDecimalPlaces`, `toSignificantDigits`, `toNearest`, `clamp`, `toFixed`, `decimalPlaces`, `significantDigits` |
+| `dezimal/preset/power` | `sqrt`, `cbrt`, `pow`, `exp`, `ln`, `log` (+ `Decimal.log2`, `Decimal.log10`), `Decimal.hypot` |
+| `dezimal/preset/format` | `toString`, `toPlainString`, `toFixed`, `toExponential`, `toPrecision`, `toNumber`, `decimalPlaces`, `significantDigits` |
+| `dezimal/preset/config` | `Decimal.precision`, `Decimal.rounding`, `Decimal.ln10` |
+| `dezimal/preset/full` | everything |
 
-Every extension is also available on its own as `dezi/<kind>/<name>`, for example `dezi/ops/divide`, `dezi/check/is-zero` or `dezi/format/to-fixed`:
+Every extension is also available on its own as `dezimal/<kind>/<name>`, for example `dezimal/ops/divide`, `dezimal/check/is-zero` or `dezimal/format/to-fixed`:
 
 | Kind | Extensions |
 | --- | --- |
-| `dezi/ops/*` | `plus`, `minus`, `times`, `divide`, `divide-integer`, `modulo`, `absolute`, `negate`, `sum`, `max`, `min`, `round`, `floor`, `ceil`, `truncate`, `to-decimal-places`, `to-significant-digits`, `to-nearest`, `clamp`, `sqrt`, `cbrt`, `pow`, `exp`, `ln`, `log`, `hypot` |
-| `dezi/check/*` | `compare`, `equals`, `greater-than`, `greater-than-or-equal`, `less-than`, `less-than-or-equal`, `sign`, `is-zero`, `is-integer`, `is-negative`, `is-positive`, `is-decimal`, `decimal-places`, `significant-digits` |
-| `dezi/format/*` | `to-string`, `to-plain-string`, `to-fixed`, `to-exponential`, `to-precision`, `to-number`, `to-big-int`, `to-json` |
-| `dezi/config/*` | `precision`, `rounding-modes`, `ln10` |
+| `dezimal/ops/*` | `plus`, `minus`, `times`, `divide`, `divide-integer`, `modulo`, `absolute`, `negate`, `sum`, `max`, `min`, `round`, `floor`, `ceil`, `truncate`, `to-decimal-places`, `to-significant-digits`, `to-nearest`, `clamp`, `sqrt`, `cbrt`, `pow`, `exp`, `ln`, `log`, `hypot` |
+| `dezimal/check/*` | `compare`, `equals`, `greater-than`, `greater-than-or-equal`, `less-than`, `less-than-or-equal`, `sign`, `is-zero`, `is-integer`, `is-negative`, `is-positive`, `is-decimal`, `decimal-places`, `significant-digits` |
+| `dezimal/format/*` | `to-string`, `to-plain-string`, `to-fixed`, `to-exponential`, `to-precision`, `to-number`, `to-big-int`, `to-json` |
+| `dezimal/config/*` | `precision`, `rounding-modes`, `ln10` |
 
 Extensions register themselves on import and pull in what they depend on. Importing the same extension from several places is harmless.
 
@@ -127,7 +127,7 @@ new Decimal("19.999").toFixed(2); // "20.00"
 - **Bounded exponent.** Values and results must stay within `±Decimal.exponentLimit` (999 999) in exponent. Leaving that range throws a `RangeError` in both directions: very small results do not silently become zero.
 - **Normalized.** Trailing zeros are dropped (`"1.50"` is stored as `1.5`) and zero is always plain `0`.
 - **No implicit number coercion.** Template literals and `String(value)` use `toString()`, but `a < b`, `a + b` and `+a` throw a `TypeError` instead of silently comparing or concatenating strings. Use `compare`/`lessThan`/`plus` and `toNumber()` instead.
-- **JSON.** With `dezi/format/to-json`, `JSON.stringify` writes values as lossless strings. Read them back with `new Decimal(string)`.
+- **JSON.** With `dezimal/format/to-json`, `JSON.stringify` writes values as lossless strings. Read them back with `new Decimal(string)`.
 
 ```ts
 JSON.stringify({ price: new Decimal("19.99") }); // '{"price":"19.99"}'
@@ -136,7 +136,7 @@ new Decimal("1.5e3").toBigInt(); // 1500n
 
 ## Coming from decimal.js
 
-dezi covers the commonly used decimal.js API with a few deliberate differences:
+dezimal covers the commonly used decimal.js API with a few deliberate differences:
 
 - Operations are opt-in imports instead of all built in.
 - `plus`, `minus`, `times`, `modulo` and `sum` are exact instead of rounded to `precision`.

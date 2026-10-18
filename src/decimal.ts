@@ -4,7 +4,7 @@ export type RawDecimal = [coefficient: bigint, exponent: number];
 
 /**
  * Instance side of `Decimal`. Ops augment this interface via
- * `declare module "dezi"` to add their methods type-wise.
+ * `declare module "dezimal"` to add their methods type-wise.
  */
 export interface Decimal {
 	readonly coefficient: bigint;

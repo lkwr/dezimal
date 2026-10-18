@@ -1,4 +1,4 @@
-import type { PrecisionOptions, RoundingMode } from "dezi";
+import type { PrecisionOptions, RoundingMode } from "dezimal";
 import { Decimal, type DecimalLike, type RawDecimal } from "../decimal.ts";
 import { abs, digitsOf, pow10 } from "../utils/common.ts";
 import { currentPrecision, currentRounding } from "../utils/config.ts";
@@ -12,7 +12,7 @@ import { roundApproximation, roundToPrecision } from "../utils/rounding.ts";
 // required extensions
 import "../config/precision.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns this value raised to the given exponent.

@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { Decimal } from "../decimal.ts";
 import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
@@ -7,7 +7,7 @@ import { roundToScale } from "../utils/rounding.ts";
 // required extensions
 import "../config/rounding-modes.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the value rounded to `dp` decimal places using `mode`,

@@ -2,7 +2,7 @@ import type { Decimal } from "../decimal.ts";
 import { digitsOf } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns the number of significant digits of the value. Stored values

@@ -1,4 +1,4 @@
-import type { PrecisionOptions } from "dezi";
+import type { PrecisionOptions } from "dezimal";
 import { Decimal } from "../decimal.ts";
 import { currentPrecision, currentRounding } from "../utils/config.ts";
 import { expToPrecision } from "../utils/exponential.ts";
@@ -7,7 +7,7 @@ import { extend } from "../utils/extend.ts";
 // required extensions
 import "../config/precision.ts";
 
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		/**
 		 * Returns e (Euler's number) raised to this value, rounded to

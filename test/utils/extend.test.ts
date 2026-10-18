@@ -5,7 +5,7 @@ import { extend, extendStatic } from "../../src/utils/extend.ts";
 // tap/peek exist only so `extend`'s keyof-typed arguments compile; they are
 // registered fresh in every test and never collide with real ops. tapLimit/
 // peekLimit do the same for `extendStatic`.
-declare module "dezi" {
+declare module "dezimal" {
 	interface Decimal {
 		tap(callback: (decimal: Decimal) => void): Decimal;
 		peek(callback: (decimal: Decimal) => void): Decimal;

@@ -1,4 +1,4 @@
-import type { RoundingMode } from "dezi";
+import type { RoundingMode } from "dezimal";
 import { Decimal, type RawDecimal } from "../decimal.ts";
 import { abs, digitsOf, LOG2_10, LOG10_2, pow10 } from "./common.ts";
 import { exponentRangeError } from "./parse.ts";

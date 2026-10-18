@@ -2,7 +2,7 @@ import { extendStatic } from "../utils/extend.ts";
 
 // EUCLID (a decimal.js constant with value 9) is not a rounding mode: it
 // selects a modulo-division variant, planned with the `modulo` config.
-declare module "dezi" {
+declare module "dezimal" {
 	export type RoundingMode =
 		| "up"
 		| "down"
