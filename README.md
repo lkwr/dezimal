@@ -4,6 +4,9 @@ Arbitrary-precision decimal arithmetic for JavaScript and TypeScript: a sub-1 kB
 
 _dezi_ is short for _Dezimal_, German for decimal.
 
+> [!WARNING]
+> dezi is an experiment: it explores how much smaller and more modern a decimal library can be than decimal.js. Almost all of its code was written with AI. It is tested extensively, including against decimal.js, but correctness is not guaranteed — verify results before relying on them for anything critical.
+
 ```ts
 import { Decimal } from "dezi";
 import "dezi/preset/basic";
