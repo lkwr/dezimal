@@ -16,6 +16,7 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
 
 - **No NaN, no ±Infinity, no signed zero.** Parse is strict; operations that would produce non-finite results throw `RangeError` instead of saturating (details in ROADMAP "Invariants").
 - Zero is always `[0n, 0]`.
+- Results beyond `±Decimal.exponentLimit` throw `RangeError` in both directions — underflow does not flush to zero.
 
 ## Architecture
 
@@ -27,17 +28,19 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
   - `src/config/` — global settings and value-less factories (precision, rounding, set…)
 - Each extension has exactly **one** `declare module "dezi"` block declaring both interfaces and any exported types (e.g. `RoundingMode`). Runtime members attach via `extend()`/`extendStatic()` from `src/utils/extend.ts`; aliases must also be declared inside the block.
 - The `"dezi"` specifier is type-level only in-repo: use it for `declare module "dezi"` and `import type` (tsconfig paths maps it to `src/index.ts`; consumers resolve it via package self-reference). Runtime imports in `src/` and `test/` are always relative (`../decimal.ts`, `../src/preset/full.ts`) — vitest does not resolve `"dezi"`.
-- Value range: `Decimal.exponentLimit` (±999 999) is checked by string parsing and by each op that can grow the exponent (`divide`, `pow`, `exp`, `ln`, `cbrt`, `to-nearest` throw `RangeError` with the shared "Decimal exponent out of range" message). The constructor does **not** check tuple/bigint input, so `times`/`plus` results can currently exceed the limit — a new op that can grow the exponent must check it itself until that is centralized.
+- Canonical values: `parse()` (and therefore `new Decimal(...)`) normalizes every input and range-checks the normalized exponent against `Decimal.exponentLimit` (±999 999). Ops build results as raw tuples and return `new Decimal(raw)` — no op needs its own normalize or range check. Only ops that would otherwise compute a gigantic intermediate (`pow`, `exp`) pre-check and throw `exponentRangeError()` early. Inside ops read the receiver via `this.raw`/`this.coefficient`, never `parse(this)`.
 - Config statics are owned by extensions, not the core constructor (`precision` lives in `src/config/precision.ts`, notation thresholds in `src/format/to-string.ts`); consumers read them through side-effect imports of the owning extension.
 - Static methods are the exception: only receiver-less operations (`max`, `min`, `sum`, `hypot`, `arctan2`, `sign`) and the two-sided `compare` allowlist. No `Decimal.add(x, y)`-style mirrors of instance ops.
-- Arithmetic family is exact (bigints); divide/transcendental ops are precision-based: they round to `Decimal.precision` significant digits using `Decimal.rounding` (a string-union `RoundingMode`, default `"half-up"`).
+- Arithmetic family is exact (bigints); divide/transcendental ops are precision-based: they round to `Decimal.precision` significant digits using `Decimal.rounding` (a string-union `RoundingMode`, default `"half-up"`). Read the precision via `currentPrecision()` (validates it).
+- Precision-based ops round **once**: never chain public precision-rounded ops (`a.ln().divide(b.ln())`) — call the `*ToPrecision` helpers with guard digits and round the final value with `roundToPrecision`, or `roundApproximation` when an exact result must survive directed modes. Verify new math against decimal.js on randomized inputs across precisions and all nine modes.
 - Naming: verb primaries without filler words (`divide`, not `dividedBy`; `lessThanOrEqual`, not `lessThanOrEqualTo`), short aliases (`div`, `sub`, `gt`). decimal.js names appear in ROADMAP tables as parity-audit references only.
 - Public API signatures use meaningful parameter names, never generic single letters (`sign(value)`, not `sign(x)`; explicit pairs like `compare(a, b)` are fine). Variadic value lists use `...values`.
 - JSDoc describes dezi's behavior in its own terms; never mention decimal.js in JSDoc. Internal file comments may reference decimal.js for design context.
 - Simple shared helpers live in `src/utils/` and are imported, never redeclared per extension file. Check these before writing a local copy:
-  - `utils/common.ts` — `normalize`, `pow10`, `abs`, `digitsOf` (instead of inline `.toString().length`), `addRaw` (exact aligned addition), `LOG2_10`/`LOG10_2` float seeds
-  - `utils/rounding.ts` — `roundToScale` (quantize to `10^k`), `roundingIncrement` (the nine modes against your own half/discard probes)
-  - `utils/integer-roots.ts` — `isqrt`/`icbrt`; `utils/integer-division.ts` — `truncDivide`; `utils/string.ts` — `exponentialString`; `utils/parse.ts` — `parse` for every `DecimalLike` argument
+  - `utils/common.ts` — `normalize`, `pow10` (table-backed, use it instead of `10n ** …`), `abs`, `digitsOf` (instead of inline `.toString().length`), `addRaw` (exact aligned addition), `LOG2_10`/`LOG10_2` float seeds
+  - `utils/rounding.ts` — `roundingIncrement` (the nine modes against your own half/discard probes), `roundQuotient` (rounded integer division), `roundToScale` (quantize to `10^k`), `roundToPrecision` (to n significant digits), `roundApproximation` (final rounding of a guard-digit approximation, snapping exact results)
+  - `utils/division.ts` — `truncDivide`, `divideToPrecision`; `utils/integer-roots.ts` — `isqrt`/`icbrt`, `rootToPrecision`; `utils/logarithm.ts` — `lnToPrecision`; `utils/exponential.ts` — `expToPrecision`
+  - `utils/precision.ts` — `currentPrecision()`; `utils/parse.ts` — `parse` for every `DecimalLike` argument, `exponentRangeError`; `utils/string.ts` — `exponentialString`, `plainString`
 
 ## Reference: decimal.js source
 
@@ -46,7 +49,7 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
 decimal.js is dezi's parity target and doubles as a reference for how an implementation of a math operation can look (rounding pipelines, argument reduction, series summation, exponentiation by squaring). Read it as **inspiration, not source**:
 
 - The code is dated and does not use `bigint`: it stores digits in arrays and rounds in every operation — none of that carries over.
-- Re-express its algorithms on dezi's primitives: normalized `[coefficient, exponent]` bigint pairs, `roundToScale`/`roundingIncrement` (`src/utils/rounding.ts`), and the precision/guard patterns of `src/ops/sqrt.ts` and `src/ops/divide.ts`.
+- Re-express its algorithms on dezi's primitives: normalized `[coefficient, exponent]` bigint pairs, the rounding helpers in `src/utils/rounding.ts`, and the precision/guard patterns of `src/utils/division.ts`, `src/utils/integer-roots.ts` and `src/ops/log.ts`.
 - Keep dezi's invariants (throw instead of NaN/±Infinity, no signed zero) and dezi's naming from ROADMAP.md, never decimal.js's.
 
 ## Workflow for a new extension
@@ -57,4 +60,4 @@ decimal.js is dezi's parity target and doubles as a reference for how an impleme
 4. When asked to implement several extensions, use one subagent per extension (their file sets are disjoint).
 5. Validate with `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`, `./node_modules/.bin/biome check .`, and `node build.ts`. For performance-relevant changes also run `./node_modules/.bin/vitest bench` (dezi vs decimal.js, `test/math.bench.ts`) and `node scripts/bundle-size.ts` (per-preset min+gzip size). Dependencies: `pnpm i`.
 
-- Style: tabs, double quotes, biome-clean, `import type` for type-only imports. Use `type` for type declarations; `interface` only where declaration merging requires it: the `Decimal`/`DecimalConstructor` targets in `src/decimal.ts` and inside `declare module "dezi"` blocks.
+- Style: tabs, double quotes, biome-clean, `import type` for type-only imports, no `any`. Use `type` for type declarations; `interface` only where declaration merging requires it: the `Decimal`/`DecimalConstructor` targets in `src/decimal.ts` and inside `declare module "dezi"` blocks.

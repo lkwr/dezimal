@@ -134,13 +134,44 @@ describe("pow", () => {
 		expect(new Decimal(4).power("0.5").toString()).toBe("2");
 	});
 
-	it("agrees with the square root within 1e-18", () => {
-		const delta = new Decimal(2)
-			.pow("0.5")
-			.minus(new Decimal(2).sqrt())
-			.abs()
-			.toNumber();
-		expect(delta).toBeLessThan(1e-18);
+	it("agrees with the correctly rounded square root", () => {
+		expect(pow(2, "0.5")).toEqual(new Decimal(2).sqrt().raw);
+		expect(pow("123.456", "0.5")).toEqual(new Decimal("123.456").sqrt().raw);
+	});
+
+	it("keeps exact fractional powers exact in every mode", () => {
+		const rounding = Decimal.rounding;
+		try {
+			for (const mode of ["up", "down", "ceil", "floor"] as const) {
+				Decimal.rounding = mode;
+				expect(pow(4, "0.5")).toEqual([2n, 0]);
+				expect(pow("0.25", "1.5")).toEqual([125n, -3]);
+			}
+		} finally {
+			Decimal.rounding = rounding;
+		}
+	});
+
+	it("rounds fractional powers once, with the configured mode", () => {
+		const precision = Decimal.precision;
+		const rounding = Decimal.rounding;
+		try {
+			// 2^1.5 = 2.8284271247461900976..
+			Decimal.precision = 5;
+			Decimal.rounding = "down";
+			expect(new Decimal(2).pow("1.5").toString()).toBe("2.8284");
+			Decimal.rounding = "up";
+			expect(new Decimal(2).pow("1.5").toString()).toBe("2.8285");
+			// 10^0.30103 = 2.00000001996810462538..
+			Decimal.precision = 20;
+			Decimal.rounding = "half-up";
+			expect(new Decimal(10).pow("0.30103").toString()).toBe(
+				"2.0000000199681046254",
+			);
+		} finally {
+			Decimal.precision = precision;
+			Decimal.rounding = rounding;
+		}
 	});
 
 	it("matches the 20-digit fourth root of two", () => {

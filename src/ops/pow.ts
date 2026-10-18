@@ -55,8 +55,8 @@ const MAX_SAFE_EXPONENT = BigInt(Number.MAX_SAFE_INTEGER);
 
 /**
  * One multiplication of two signed pairs in the squaring loop, rounded to
- * `keep` significant digits (nearest, ties away from zero). Throws the house
- * exponent error once the product is certainly out of range.
+ * `keep` significant digits (nearest, ties away from zero). Throws the
+ * exponent range error once the product is certainly out of range.
  */
 const multiplyStep = (
 	a: RawDecimal,
@@ -177,9 +177,9 @@ const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
 		}
 	}
 
-	// The chain path reads the receiver through ln(), so a negative base is
-	// only meaningful with the integer parity decided inside the chain below;
-	// a negative base paired with a non-integer exponent has no real value.
+	// The chain path works on |x| and restores the sign from the integer
+	// exponent's parity; a negative base paired with a non-integer exponent
+	// has no real value.
 	if (self.coefficient < 0n && !exponentIsInteger) {
 		throw new RangeError(
 			"Invalid Decimal operation: negative base with a non-integer exponent",

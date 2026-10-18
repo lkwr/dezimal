@@ -30,7 +30,7 @@ These apply before anything else and are deliberate deviations from decimal.js:
   - `ln` / `log` of a non-positive value → `RangeError`
   - `arcsin` / `arccos` outside `[-1, 1]` → `RangeError`
   - `artanh` outside `(-1, 1)`, `arccosh` below `1` → `RangeError`
-  - `pow` / `exp` overflowing `Decimal.exponentLimit` → `RangeError`
+  - any result whose normalized exponent leaves `±Decimal.exponentLimit` (overflow **and** underflow, e.g. `times`, `pow`, `exp`, `divide`) → `RangeError`; checked centrally in parse/construction
   - `divide-integer` / `modulo` with zero divisor → `RangeError`
 - **No negative zero.** Zero is always `[0n, 0]` (already guaranteed by normalization).
 - **Parity delta:** decimal.js's `isNaN()` and `isFinite()` predicates are **excluded** — under the invariant above they'd be constants. `isNegative()`, `isPositive()`, `isZero()`, `isInteger()` are kept.
@@ -90,8 +90,8 @@ Notes:
 | `cbrt`    | I     | `cbrt`                                 | instance `cubeRoot` (alias `cbrt`); dezi drops static `Decimal.cbrt(x)`                                                                | power, full | P2       | ✅ (correctly rounded, sign-preserving)                                                                                    |
 | `exp`     | I     | `exp`                                  | instance `naturalExponential` (alias `exp`); dezi drops static `Decimal.exp(x)`                                                        | power, full | P2       | ✅ (reduction + Taylor; certain-overflow pre-check)                                                                        |
 | `ln`      | I     | `ln`                                   | instance `naturalLogarithm` (alias `ln`); dezi drops static `Decimal.ln(x)`                                                            | power, full | P2       | ✅ (reduction + series; see design note 7)                                                                                 |
-| `log`     | I     | `log(base?)` + statics `log2`, `log10` | instance `logarithm` (alias `log`; default base 10); dezi drops statics `Decimal.log(x, base?)`, `Decimal.log2(x)`, `Decimal.log10(x)` | power, full | P2       | ✅ (via ln + divide; default base 10)                                                                                      |
-| `hypot`   | S     | `hypot(...values)`                     | static `Decimal.hypot(x, y, ...)`                                                                                                      | power, full | P2       | ✅ (exact sum of squares, sqrt-rolled)                                                                                     |
+| `log`     | I     | `log(base?)` + statics `log2`, `log10` | instance `logarithm` (alias `log`; default base 10); dezi drops statics `Decimal.log(x, base?)`, `Decimal.log2(x)`, `Decimal.log10(x)` | power, full | P2       | ✅ (ln quotient at guard digits, rounded once; default base 10)                                                           |
+| `hypot`   | S     | `hypot(...values)`                     | static `Decimal.hypot(x, y, ...)`                                                                                                      | power, full | P2       | ✅ (exact sum of squares, one correctly rounded root)                                                                      |
 
 #### Trigonometric
 
