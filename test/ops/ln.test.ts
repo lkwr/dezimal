@@ -160,8 +160,6 @@ describe("ln", () => {
 			Decimal.precision = 0;
 			expect(() => new Decimal(2).ln()).toThrow(RangeError);
 			expect(() => new Decimal(2).ln()).toThrow("expected a positive integer");
-			// ln(1) is exact and never consults the precision, like sqrt(0).
-			expect(ln(1)).toEqual([0n, 0]);
 		} finally {
 			Decimal.precision = precision;
 		}

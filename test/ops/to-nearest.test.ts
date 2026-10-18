@@ -172,7 +172,7 @@ describe("toNearest", () => {
 			RangeError,
 		);
 		expect(() => new Decimal("9.5e999999").toNearest("1e999999")).toThrow(
-			"Decimal exponent out of range (±999999): 1e1000000",
+			"Decimal exponent out of range (±999999): 1000000",
 		);
 		// down stops at k = 9, keeping 9e999999 inside the field
 		expect(toNearest("9.5e999999", "1e999999", "down")).toEqual([9n, 999999]);

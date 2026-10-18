@@ -1,6 +1,6 @@
 import type { RoundingMode } from "dezi";
 import type { RawDecimal } from "../decimal.ts";
-import { abs, digitsOf, normalize, pow10 } from "./common.ts";
+import { abs, addRaw, digitsOf, normalize, pow10 } from "./common.ts";
 
 export type RoundingDecision = {
 	/** Any nonzero part was truncated away. */
@@ -110,3 +110,28 @@ export const roundToPrecision = (
 	mode: RoundingMode,
 ): RawDecimal =>
 	roundToScale(value, value[1] + digitsOf(value[0]) - digits, mode);
+
+/** Units in the last place within which an approximation snaps to the grid. */
+const SNAP_TOLERANCE = 100n;
+
+/**
+ * Rounds an approximation that carries guard digits beyond `digits` to
+ * `digits` significant digits. An approximation within a few units of its
+ * last place from a value on the target grid is snapped to that value:
+ * exactly representable results such as log10(1000) or 4^0.5 then survive
+ * the directed modes, while a transcendental result lands that close to the
+ * grid only with negligible probability (~10^-8 at ten guard digits).
+ */
+export const roundApproximation = (
+	value: RawDecimal,
+	digits: number,
+	mode: RoundingMode,
+): RawDecimal => {
+	const nearest = roundToPrecision(value, digits, "half-even");
+	const [difference, exponent] = addRaw(value, [-nearest[0], nearest[1]]);
+	// Aligned on the finer of the two grids, which is the value's own.
+	const snap =
+		difference === 0n ||
+		abs(difference) * pow10(exponent - value[1]) <= SNAP_TOLERANCE;
+	return snap ? nearest : roundToPrecision(value, digits, mode);
+};

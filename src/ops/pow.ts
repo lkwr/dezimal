@@ -1,17 +1,15 @@
 import { Decimal, type DecimalLike, type RawDecimal } from "../decimal.ts";
 import { abs, digitsOf, pow10 } from "../utils/common.ts";
 import { divideToPrecision } from "../utils/division.ts";
+import { expToPrecision } from "../utils/exponential.ts";
 import { extend } from "../utils/extend.ts";
-import { parse } from "../utils/parse.ts";
+import { lnToPrecision } from "../utils/logarithm.ts";
+import { exponentRangeError, parse } from "../utils/parse.ts";
 import { currentPrecision } from "../utils/precision.ts";
-import { roundToPrecision } from "../utils/rounding.ts";
+import { roundApproximation, roundToPrecision } from "../utils/rounding.ts";
 
 // required extensions
 import "../config/rounding-modes.ts";
-import "./absolute.ts";
-import "./exp.ts";
-import "./ln.ts";
-import "./times.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -48,6 +46,9 @@ declare module "dezi" {
 	}
 }
 
+/** Digits beyond the target precision carried through ln and exp. */
+const POW_GUARD = 10;
+
 // Positive-integer exponents beyond this bound fall through to the logarithm
 // chain; below it, the exact squaring loop stays cheap (≤ 53 iterations).
 const MAX_SAFE_EXPONENT = BigInt(Number.MAX_SAFE_INTEGER);
@@ -78,9 +79,7 @@ const multiplyStep = (
 	const decade = exponent + digitsOf(coefficient) - 1;
 	const bound = Decimal.exponentLimit + Decimal.precision + 64;
 	if (Math.abs(decade) > bound) {
-		throw new RangeError(
-			`Decimal exponent out of range (±${Decimal.exponentLimit}): ${coefficient}e${exponent}`,
-		);
+		throw exponentRangeError(decade);
 	}
 	return [coefficient, exponent];
 };
@@ -197,24 +196,45 @@ const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
 	// one). The ±1 slack leaves borderline estimates to the chain's own range
 	// guards, and estimates that degenerate to NaN simply fall through to
 	// them.
-	const base = negativeBase ? self.absolute() : self;
-	const digits = abs(base.coefficient).toString();
+	const magnitude: RawDecimal = [abs(self.coefficient), self.exponent];
+	const digits = magnitude[0].toString();
 	const estimate = Math.floor(
 		Number(yc) *
 			10 ** ye *
-			(Math.log10(Number(`0.${digits}`)) + base.exponent + digits.length),
+			(Math.log10(Number(`0.${digits}`)) + self.exponent + digits.length),
 	);
 	if (
 		estimate > Decimal.exponentLimit + 1 ||
 		estimate < -(Decimal.exponentLimit + 1)
 	) {
-		throw new RangeError(
-			`Decimal exponent out of range (±${Decimal.exponentLimit}): 1e${estimate < 0 ? "-" : ""}${Decimal.exponentLimit + 1}`,
-		);
+		throw exponentRangeError(estimate);
 	}
 
-	const result = base.ln().times([yc, ye]).exp();
-	return negated ? new Decimal([-result.coefficient, result.exponent]) : result;
+	// x^y = exp(y·ln|x|). An error of δ relative in ln|x| becomes an
+	// absolute error of δ·|y·ln|x|| in the exponent and thus a relative one
+	// in the result, so the working precision buys back the integer digits
+	// of y·ln|x| (≈ the estimate's digits) on top of the guard digits.
+	// |y·ln|x|| ≈ 2.3·|estimate|; a NaN estimate (|x| = 1) needs nothing.
+	const amplification =
+		Math.ceil(Math.log10((Math.abs(estimate) || 0) + 1)) + 1;
+	const working = precision + POW_GUARD + amplification;
+	const [lnCoefficient, lnExponent] = lnToPrecision(
+		magnitude,
+		working,
+		"half-even",
+	);
+	const [resultCoefficient, resultExponent] = expToPrecision(
+		[lnCoefficient * yc, lnExponent + ye],
+		working,
+		"half-even",
+	);
+	return new Decimal(
+		roundApproximation(
+			[negated ? -resultCoefficient : resultCoefficient, resultExponent],
+			precision,
+			Decimal.rounding,
+		),
+	);
 };
 
 extend(

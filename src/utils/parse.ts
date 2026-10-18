@@ -17,14 +17,18 @@ export const parse = (decimal: DecimalLike): RawDecimal => {
 	return checkRange(normalize(parseUnchecked(decimal)));
 };
 
+/** The error for a value whose exponent leaves `±Decimal.exponentLimit`. */
+export const exponentRangeError = (exponent: number): RangeError =>
+	new RangeError(
+		`Decimal exponent out of range (±${Decimal.exponentLimit}): ${exponent}`,
+	);
+
 /** Throws unless the normalized exponent lies within `±Decimal.exponentLimit`. */
 const checkRange = (value: RawDecimal): RawDecimal => {
 	// Negated form so a NaN exponent (from an absurdly long exponent string)
 	// is rejected too.
 	if (!(Math.abs(value[1]) <= Decimal.exponentLimit)) {
-		throw new RangeError(
-			`Decimal exponent out of range (±${Decimal.exponentLimit}): ${value[0]}e${value[1]}`,
-		);
+		throw exponentRangeError(value[1]);
 	}
 	return value;
 };

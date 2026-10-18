@@ -28,36 +28,34 @@ describe("log", () => {
 		expect(Decimal.log10("1e20").raw).toEqual([2n, 1]);
 	});
 
-	it("stays a fraction of an ulp away from the exact logarithm", () => {
-		// The ln→divide chain is accurate to a couple of ulps in principle;
-		// script-verified against high-precision reference digits, every
-		// deviation below stays inside half an ulp of the 20-digit rounding
-		// (1e-19 at these magnitudes). Anchors carry 26 true digits.
-		const cases: [DecimalLike, DecimalLike, string, RawDecimal][] = [
-			[5, 10n, "0.6989700043360188047862611", [37389n, -25]],
-			[12, 10n, "1.079181246047624827722505692", [22505692n, -27]],
-			["0.3", 10n, "-0.5228787452803375627049721", [49721n, -25]],
-			[3, 2n, "1.5849625007211561814537389", [462611n, -25]],
-			[100, 2n, "6.6438561897747246957406389", [406389n, -25]],
-			[2, 10n, "0.3010299956639811952137389", [62611n, -25]],
+	it("is correctly rounded", () => {
+		// Reference digits: the exact logarithms rounded half-up at 20 digits.
+		const cases: [DecimalLike, DecimalLike, string][] = [
+			[5, 10n, "0.69897000433601880479"],
+			[12, 10n, "1.0791812460476248277"],
+			["0.3", 10n, "-0.5228787452803375627"],
+			[3, 2n, "1.5849625007211561815"],
+			[100, 2n, "6.6438561897747246957"],
+			[2, 10n, "0.30102999566398119521"],
 		];
-		for (const [value, base, expected, deviation] of cases) {
-			expect(new Decimal(value).log(base).minus(expected).abs().raw).toEqual(
-				deviation,
-			);
+		for (const [value, base, expected] of cases) {
+			expect(new Decimal(value).log(base).toString()).toBe(expected);
 		}
 		expect(Decimal.log2(3).raw).toEqual(new Decimal(3).log(2n).raw);
 	});
-
-	it("drifts a single ulp on a boundary-hugging quotient", () => {
-		// log2(8) = 3 exactly, but both ln values round up while the true
-		// quotient sits ~6e-20 above 3, past the halfway point of the 1e-19
-		// last place - so the chain leaves 3.0000000000000000001, still far
-		// inside a 1e-17 tolerance.
-		expect(new Decimal(8).log(2n).toString()).toBe("3.0000000000000000001");
-		expect(new Decimal(8).log(2n).minus(3n).abs().raw).toEqual([1n, -19]);
+	it("keeps exact results exact in every mode", () => {
+		const rounding = Decimal.rounding;
+		try {
+			for (const mode of ["up", "down", "ceil", "floor"] as const) {
+				Decimal.rounding = mode;
+				expect(new Decimal(8).log(2n).raw).toEqual([3n, 0]);
+				expect(new Decimal("0.001").log().raw).toEqual([-3n, 0]);
+				expect(new Decimal(8).log(4n).raw).toEqual([15n, -1]);
+			}
+		} finally {
+			Decimal.rounding = rounding;
+		}
 	});
-
 	it("returns exact zero for a receiver of one, whatever the mode", () => {
 		const rounding = Decimal.rounding;
 		const modes: RoundingMode[] = [
@@ -83,30 +81,13 @@ describe("log", () => {
 		}
 	});
 
-	it("stays sane across a deep ln reduction chain", () => {
-		// log10(1e999999) = 999999.0000000000000002: the ~35-step sqrt
-		// reduction keeps ln sub-ulp accurate, and the quotient drifts two
-		// ulps of 1e-14 (script-verified).
-		expect(new Decimal("1e999999").log().minus(999999n).abs().raw).toEqual([
-			2n,
-			-14,
-		]);
-		// True value 999999.09131515969722287725920506
-		// (= 999999 + log10(1.234)); the error is 1.7e-14.
-		expect(
-			new Decimal("1.234e999999")
-				.log()
-				.minus("999999.09131515969722287725920506")
-				.abs().raw,
-		).toEqual([1712274079494n, -26]);
-		// True value 3321924.7729592674605079715592 (= 999999·log2(10));
-		// the error is 8e-15, a fraction of the 1e-13 ulp.
-		expect(
-			Decimal.log2("1e999999").minus("3321924.7729592674605079715592").abs()
-				.raw,
-		).toEqual([79715592n, -22]);
+	it("stays exact across a deep ln reduction chain", () => {
+		expect(new Decimal("1e999999").log().raw).toEqual([999999n, 0]);
+		expect(new Decimal("1.234e999999").log().toString()).toBe(
+			"999999.09131515969722",
+		);
+		expect(Decimal.log2("1e999999").toString()).toBe("3321924.7729592674605");
 	});
-
 	it("throws on a non-positive receiver", () => {
 		expect(() => log(0)).toThrow(RangeError);
 		expect(() => log(0)).toThrow("logarithm of a non-positive value");
@@ -139,12 +120,8 @@ describe("log", () => {
 			expect(log(1000)).toEqual([3n, 0]);
 			expect(new Decimal(1000).log().toString()).toBe("3");
 			expect(new Decimal(1000).log().minus(3n).abs().raw).toEqual([0n, 0]);
-			// log2(3) = 1.5849625007211561814537389..: the chained 5-digit
-			// result 1.5849 deviates by 6.25e-5, inside the 1e-4 last place.
-			expect(Decimal.log2(3).raw).toEqual([15849n, -4]);
-			expect(
-				Decimal.log2(3).minus("1.5849625007211561814537389").abs().raw,
-			).toEqual([625007211561814537389n, -25]);
+			// log2(3) = 1.58496.. rounds to 1.5850 at 5 digits.
+			expect(Decimal.log2(3).raw).toEqual([1585n, -3]);
 		} finally {
 			Decimal.precision = precision;
 		}
@@ -170,14 +147,13 @@ describe("log", () => {
 		const rounding = Decimal.rounding;
 		try {
 			Decimal.precision = 5;
-			// log10(7) = 0.84509804..: up and down perturb each ln rounding
-			// and the final divide, half-up lands nearest.
+			// log10(7) = 0.84509804..: only the final rounding sees the mode.
 			Decimal.rounding = "up";
-			expect(new Decimal(7).log().toString()).toBe("0.84514");
+			expect(new Decimal(7).log().toString()).toBe("0.8451");
 			Decimal.rounding = "down";
-			expect(new Decimal(7).log().toString()).toBe("0.84512");
-			Decimal.rounding = "half-up";
 			expect(new Decimal(7).log().toString()).toBe("0.84509");
+			Decimal.rounding = "half-up";
+			expect(new Decimal(7).log().toString()).toBe("0.8451");
 		} finally {
 			Decimal.precision = precision;
 			Decimal.rounding = rounding;

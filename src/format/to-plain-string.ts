@@ -1,6 +1,7 @@
 import type { Decimal } from "../decimal.ts";
 import { abs } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
+import { plainString } from "../utils/string.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -15,27 +16,12 @@ declare module "dezi" {
 
 extend(
 	"toPlainString",
-	function toPlainString(this: Decimal, fractionDigits = 0): string {
-		const sign = this.coefficient < 0n ? "-" : "";
-		const digits = abs(this.coefficient).toString();
-		const pointIndex = digits.length + this.exponent;
-
-		let integerPart: string;
-		let fractionPart: string;
-		if (this.exponent >= 0) {
-			integerPart = digits + "0".repeat(this.exponent);
-			fractionPart = "";
-		} else if (pointIndex > 0) {
-			integerPart = digits.slice(0, pointIndex);
-			fractionPart = digits.slice(pointIndex);
-		} else {
-			integerPart = "0";
-			fractionPart = "0".repeat(-pointIndex) + digits;
-		}
-
-		fractionPart = fractionPart.padEnd(fractionDigits, "0");
-		return fractionPart
-			? `${sign}${integerPart}.${fractionPart}`
-			: `${sign}${integerPart}`;
+	function toPlainString(this: Decimal, fractionDigits?: number): string {
+		return plainString(
+			this.coefficient < 0n ? "-" : "",
+			abs(this.coefficient).toString(),
+			this.exponent,
+			fractionDigits,
+		);
 	},
 );

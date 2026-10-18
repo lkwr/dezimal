@@ -2,7 +2,15 @@ import type { RawDecimal } from "../decimal.ts";
 
 export const TEN = 10n;
 
-export const pow10 = (exponent: number): bigint => TEN ** BigInt(exponent);
+// Powers of ten up to typical working precisions are served from a table:
+// recomputing them dominates small-operand arithmetic otherwise.
+const SMALL_POWERS = Array.from(
+	{ length: 128 },
+	(_, index) => TEN ** BigInt(index),
+);
+
+export const pow10 = (exponent: number): bigint =>
+	SMALL_POWERS[exponent] ?? TEN ** BigInt(exponent);
 
 export const abs = (value: bigint): bigint => (value < 0n ? -value : value);
 

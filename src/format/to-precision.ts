@@ -3,7 +3,7 @@ import { Decimal } from "../decimal.ts";
 import { abs, digitsOf } from "../utils/common.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
-import { exponentialString } from "../utils/string.ts";
+import { exponentialString, plainString } from "../utils/string.ts";
 
 // required extensions
 import "../config/rounding-modes.ts";
@@ -50,23 +50,9 @@ extend(
 		const leadingPower = digits.length + roundedExponent - 1;
 		if (leadingPower > Decimal.minPlainExponent && leadingPower < sd) {
 			// The stored coefficient is normalized, which strips the trailing
-			// zeros the sd-digit form needs, so re-pad to sd digits and place
-			// the point over the padded digits, which stand for
-			// coefficient × 10^(leadingPower - sd + 1). Point placement follows
-			// toPlainString's branch structure.
-			const padded = digits.padEnd(sd, "0");
-			let integerPart: string;
-			let fractionPart: string;
-			if (leadingPower >= 0) {
-				integerPart = padded.slice(0, leadingPower + 1);
-				fractionPart = padded.slice(leadingPower + 1);
-			} else {
-				integerPart = "0";
-				fractionPart = `${"0".repeat(-leadingPower - 1)}${padded}`;
-			}
-			return fractionPart
-				? `${sign}${integerPart}.${fractionPart}`
-				: `${sign}${integerPart}`;
+			// zeros the sd-digit form needs: re-pad to sd digits, which stand
+			// for coefficient × 10^(leadingPower - sd + 1).
+			return plainString(sign, digits.padEnd(sd, "0"), leadingPower - sd + 1);
 		}
 		return exponentialString(sign, digits, leadingPower, sd);
 	},

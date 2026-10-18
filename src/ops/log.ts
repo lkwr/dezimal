@@ -1,9 +1,12 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
+import { divideToPrecision } from "../utils/division.ts";
 import { extend, extendStatic } from "../utils/extend.ts";
+import { lnToPrecision } from "../utils/logarithm.ts";
+import { currentPrecision } from "../utils/precision.ts";
+import { roundApproximation } from "../utils/rounding.ts";
 
 // required extensions
-import "./ln.ts";
-import "./divide.ts";
+import "../config/rounding-modes.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -31,12 +34,14 @@ declare module "dezi" {
 	}
 }
 
+/** Digits beyond the target precision carried by the intermediate logarithms. */
+const LOG_GUARD = 10;
+
 /**
- * Computes the logarithm of `value` in `base` as the quotient of the two
- * public `ln()` results, so each logarithm and the final divide round to
- * `Decimal.precision` significant digits with the configured
- * `Decimal.rounding` mode. The chain therefore carries a worst case of about
- * two ulps instead of single-step correct rounding.
+ * Computes the logarithm of `value` in `base` as ln(value)/ln(base). Both
+ * logarithms and their quotient are carried `LOG_GUARD` digits beyond
+ * `Decimal.precision`, so only the final rounding (with `Decimal.rounding`)
+ * reaches the result.
  */
 const logDecimal = (value: Decimal, base: DecimalLike): Decimal => {
 	if (value.coefficient <= 0n) {
@@ -55,7 +60,15 @@ const logDecimal = (value: Decimal, base: DecimalLike): Decimal => {
 			"Invalid Decimal operation: logarithm base equal to 1",
 		);
 	}
-	return value.ln().divide(divisor.ln());
+	const precision = currentPrecision();
+	const working = precision + LOG_GUARD;
+	const quotient = divideToPrecision(
+		lnToPrecision(value.raw, working, "half-even"),
+		lnToPrecision(divisor.raw, working, "half-even"),
+		working,
+		"half-even",
+	);
+	return new Decimal(roundApproximation(quotient, precision, Decimal.rounding));
 };
 
 extend("log", function log(this: Decimal, base?: DecimalLike): Decimal {

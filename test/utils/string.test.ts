@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exponentialString } from "../../src/utils/string.ts";
+import { exponentialString, plainString } from "../../src/utils/string.ts";
 
 describe("exponentialString", () => {
 	it("formats a single digit without a fraction", () => {
@@ -40,5 +40,24 @@ describe("exponentialString", () => {
 	it("matches the format used by Decimal.toString", () => {
 		// 123.4 has digits "1234" at leading power 2.
 		expect(exponentialString("", "1234", 2)).toBe("1.234e+2");
+	});
+});
+
+describe("plainString", () => {
+	it("appends zeros for non-negative exponents", () => {
+		expect(plainString("", "12", 0)).toBe("12");
+		expect(plainString("-", "12", 3)).toBe("-12000");
+		expect(plainString("", "12", 1, 2)).toBe("120.00");
+	});
+
+	it("places the point inside or before the digits", () => {
+		expect(plainString("", "1234", -2)).toBe("12.34");
+		expect(plainString("", "1234", -4)).toBe("0.1234");
+		expect(plainString("-", "12", -5)).toBe("-0.00012");
+	});
+
+	it("pads the fraction to at least fractionDigits", () => {
+		expect(plainString("", "15", -1, 3)).toBe("1.500");
+		expect(plainString("", "12345", -4, 2)).toBe("1.2345");
 	});
 });
