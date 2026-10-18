@@ -154,17 +154,18 @@ Bundle size (min+gzip, including the core):
 | `preset/basic` | 2.5 kB |
 | `preset/full` | 5.0 kB |
 
-Throughput relative to decimal.js 10.6 on Node 26 (higher is better; plain Node script, typical 3–6 digit operands, default precision 20):
+Throughput relative to decimal.js 10.6 on Node 26 (higher is better), measured with `pnpm run bench`:
 
-| Operation | dezi vs decimal.js |
-| --- | --- |
-| parse | 1.7× |
-| `plus` / `minus` / `times` | 2.2× / 2.2× / 3.9× |
-| `divide` | 1.6× |
-| `compare` / `toString` | 1.1× / 1.0× |
-| `sqrt` | 5.6× |
-| `exp` / `ln` | 4.2× / 1.8× |
-| `pow` (fractional / integer) | 2.3× / 1.1× |
+| Operation | typical operands, precision 20 | 50-digit operands, precision 50 |
+| --- | --- | --- |
+| parse | 1.5× | |
+| `plus` / `minus` | 2.5× / 2.2× | 1.1× / – |
+| `times` | 3.4× | 9.6× |
+| `divide` | 1.7× | 3.6× |
+| `compare` / `toString` / `toFixed` | 1.3× / 1.0× / 1.2× | |
+| `sqrt` | 5.2× | 8.3× |
+| `exp` / `ln` | 4.6× / 2.0× | – / 2.8× |
+| `pow` (fractional / integer) | 2.3× / 1.1× | |
 
 ## License
 

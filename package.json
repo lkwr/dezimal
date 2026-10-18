@@ -11,7 +11,7 @@
 		"build": "tsc --noEmit && node build.ts",
 		"test": "vitest",
 		"size": "node scripts/bundle-size.ts",
-		"bench": "vitest bench",
+		"bench": "node scripts/bench.ts",
 		"check-consumer": "node scripts/check-consumer.ts"
 	},
 

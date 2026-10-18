@@ -27,7 +27,14 @@ jobs:
         run: pnpm run test
 
       - name: Benchmark
-        run: pnpm run bench
+        run: |
+          set -o pipefail
+          {
+            echo "## Benchmark (dezi vs decimal.js)"
+            echo '```'
+            pnpm run bench
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Build
         run: pnpm run build
