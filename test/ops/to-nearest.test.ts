@@ -176,13 +176,6 @@ describe("toNearest", () => {
 		);
 		// down stops at k = 9, keeping 9e999999 inside the field
 		expect(toNearest("9.5e999999", "1e999999", "down")).toEqual([9n, 999999]);
-		// on the negative side the carry from rounding up lands back inside
-		expect(
-			toNearest(
-				[95n, -1000000] satisfies RawDecimal,
-				[1n, -999999] satisfies RawDecimal,
-			),
-		).toEqual([1n, -999998]);
 	});
 
 	// 51 significant digits render in exponential form, so exactness is

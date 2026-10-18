@@ -15,9 +15,7 @@ extend(
 	"minus",
 	function minus(this: Decimal, input: DecimalLike): Decimal {
 		const [coefficient, exponent] = parse(input);
-		return new Decimal(
-			addRaw([this.coefficient, this.exponent], [-coefficient, exponent]),
-		);
+		return new Decimal(addRaw(this.raw, [-coefficient, exponent]));
 	},
 	["sub", "subtract"],
 );

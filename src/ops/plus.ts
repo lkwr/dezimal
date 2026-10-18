@@ -11,7 +11,7 @@ declare module "dezi" {
 }
 
 function plus(this: Decimal, input: DecimalLike): Decimal {
-	return new Decimal(addRaw([this.coefficient, this.exponent], parse(input)));
+	return new Decimal(addRaw(this.raw, parse(input)));
 }
 
 extend("plus", plus, ["add"]);

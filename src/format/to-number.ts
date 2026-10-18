@@ -15,6 +15,6 @@ declare module "dezi" {
 	}
 }
 
-extend("toNumber", function (this: Decimal) {
+extend("toNumber", function toNumber(this: Decimal): number {
 	return Number(this.toString());
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { truncDivide } from "../../src/utils/integer-division.ts";
+import { truncDivide } from "../../src/utils/division.ts";
 
 describe("truncDivide", () => {
 	it("computes an exact quotient and remainder across scales", () => {

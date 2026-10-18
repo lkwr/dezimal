@@ -10,7 +10,5 @@ declare module "dezi" {
 }
 
 extend("floor", function floor(this: Decimal): Decimal {
-	return new Decimal(
-		roundToScale([this.coefficient, this.exponent], 0, "floor"),
-	);
+	return new Decimal(roundToScale(this.raw, 0, "floor"));
 });

@@ -1,5 +1,4 @@
 import type { DecimalLike } from "../decimal.ts";
-import { normalize } from "../utils/common.ts";
 import { extendStatic } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
@@ -13,6 +12,6 @@ declare module "dezi" {
 }
 
 extendStatic("sign", function sign(value: DecimalLike): 1 | 0 | -1 {
-	const [coefficient] = normalize(parse(value));
+	const [coefficient] = parse(value);
 	return coefficient < 0n ? -1 : coefficient > 0n ? 1 : 0;
 });

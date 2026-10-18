@@ -13,9 +13,7 @@ declare module "dezi" {
 extend(
 	"truncate",
 	function truncate(this: Decimal): Decimal {
-		return new Decimal(
-			roundToScale([this.coefficient, this.exponent], 0, "down"),
-		);
+		return new Decimal(roundToScale(this.raw, 0, "down"));
 	},
 	["trunc"],
 );

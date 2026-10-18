@@ -25,7 +25,7 @@
 
 		"paths": {
 			"dezi": ["./src/index.ts"],
-			"dezi/ops/*": ["./src/preset/*.ts"],
+			"dezi/ops/*": ["./src/ops/*.ts"],
 			"dezi/check/*": ["./src/check/*.ts"],
 			"dezi/format/*": ["./src/format/*.ts"],
 			"dezi/config/*": ["./src/config/*.ts"],

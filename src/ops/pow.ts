@@ -1,17 +1,17 @@
 import { Decimal, type DecimalLike, type RawDecimal } from "../decimal.ts";
-import { abs, digitsOf, normalize, pow10 } from "../utils/common.ts";
+import { abs, digitsOf, pow10 } from "../utils/common.ts";
+import { divideToPrecision } from "../utils/division.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
-import { roundToScale } from "../utils/rounding.ts";
+import { currentPrecision } from "../utils/precision.ts";
+import { roundToPrecision } from "../utils/rounding.ts";
 
 // required extensions
-import "../config/precision.ts";
 import "../config/rounding-modes.ts";
-import "../ops/absolute.ts";
-import "../ops/divide.ts";
-import "../ops/exp.ts";
-import "../ops/ln.ts";
-import "../ops/times.ts";
+import "./absolute.ts";
+import "./exp.ts";
+import "./ln.ts";
+import "./times.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -50,35 +50,23 @@ declare module "dezi" {
 
 // Positive-integer exponents beyond this bound fall through to the logarithm
 // chain; below it, the exact squaring loop stays cheap (≤ 53 iterations).
-const MAX_SAFE_EXPONENT = 9007199254740991n;
+const MAX_SAFE_EXPONENT = BigInt(Number.MAX_SAFE_INTEGER);
 
 /**
- * One multiplication of two signed pairs in the squaring loop. Beyond `keep`
- * significant digits the normalized product is truncated to `keep` digits,
- * rounding to nearest with ties up on magnitude (the internal convention of
- * ln's working helpers), with the dropped digit count shifting the exponent
- * numerically. Throws the house exponent error once the product is certainly
- * out of range.
+ * One multiplication of two signed pairs in the squaring loop, rounded to
+ * `keep` significant digits (nearest, ties away from zero). Throws the house
+ * exponent error once the product is certainly out of range.
  */
 const multiplyStep = (
 	a: RawDecimal,
 	b: RawDecimal,
 	keep: number,
 ): RawDecimal => {
-	let [coefficient, exponent] = normalize([a[0] * b[0], a[1] + b[1]]);
-	const magnitude = abs(coefficient); // nonzero: both operands are nonzero
-	const digits = digitsOf(magnitude);
-	if (digits > keep) {
-		const divisor = pow10(digits - keep);
-		let truncated = magnitude / divisor;
-		if ((magnitude % divisor) * 2n >= divisor) {
-			truncated += 1n;
-		}
-		[coefficient, exponent] = normalize([
-			coefficient < 0n ? -truncated : truncated,
-			exponent + digits - keep,
-		]);
-	}
+	const [coefficient, exponent] = roundToPrecision(
+		[a[0] * b[0], a[1] + b[1]],
+		keep,
+		"half-up",
+	);
 
 	// This guard can only ever fire on a certainly-out-of-range product: every
 	// stored pair is truncated to at most precision + 8 digits, so its
@@ -105,11 +93,14 @@ const multiplyStep = (
  * with the configured mode. A negative exponent takes the reciprocal, which is
  * exact when it terminates on the precision grid, precision-rounded otherwise.
  */
-const integerPower = (self: Decimal, exponent: number): Decimal => {
-	const precision = Decimal.precision;
+const integerPower = (
+	self: Decimal,
+	exponent: number,
+	precision: number,
+): Decimal => {
 	const keep = precision + 8;
 	let accumulator: RawDecimal = [1n, 0];
-	let base: RawDecimal = [self.coefficient, self.exponent];
+	let base = self.raw;
 	let remaining = Math.abs(exponent);
 	while (remaining > 0) {
 		if (remaining % 2 === 1) {
@@ -123,20 +114,13 @@ const integerPower = (self: Decimal, exponent: number): Decimal => {
 		}
 	}
 	if (exponent < 0) {
-		return new Decimal(1n).divide(new Decimal(accumulator));
-	}
-	const digits = digitsOf(accumulator[0]);
-	const [coefficient, resultExponent] = roundToScale(
-		accumulator,
-		accumulator[1] + digits - precision,
-		Decimal.rounding,
-	);
-	if (Math.abs(resultExponent) > Decimal.exponentLimit) {
-		throw new RangeError(
-			`Decimal exponent out of range (±${Decimal.exponentLimit}): ${coefficient}e${resultExponent}`,
+		return new Decimal(
+			divideToPrecision([1n, 0], accumulator, precision, Decimal.rounding),
 		);
 	}
-	return new Decimal([coefficient, resultExponent]);
+	return new Decimal(
+		roundToPrecision(accumulator, precision, Decimal.rounding),
+	);
 };
 
 /**
@@ -144,12 +128,12 @@ const integerPower = (self: Decimal, exponent: number): Decimal => {
  * taking the exact squaring path for safe-integer integer exponents and the
  * natural-logarithm chain for everything else.
  */
-const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
-	const [yc, ye] = normalize(parse(exponent));
+const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
+	const [yc, ye] = parse(exponent);
 
 	// x^0 = 1.
 	if (yc === 0n) {
-		return new Decimal([1n, 0]);
+		return new Decimal(1n);
 	}
 
 	// 0^y is 0 for a positive exponent; a negative one has no value on a
@@ -161,7 +145,7 @@ const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
 				"Invalid Decimal operation: zero raised to a negative power",
 			);
 		}
-		return new Decimal([0n, 0]);
+		return self;
 	}
 
 	// 1^y = 1: the receiver itself, exact and unrounded.
@@ -169,29 +153,11 @@ const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
 		return self;
 	}
 
-	// Precision is user-mutable without validation until a `set()` extension.
-	const precision = Decimal.precision;
-	if (precision < 1) {
-		throw new RangeError(
-			`Invalid Decimal precision: expected a positive integer, got ${precision}`,
-		);
-	}
+	const precision = currentPrecision();
 
-	// x^1 = x on the `precision` digit grid, same construction as
-	// to-significant-digits, with the house exponent-field guard.
+	// x^1 = x on the `precision` digit grid.
 	if (yc === 1n && ye === 0) {
-		const digits = digitsOf(self.coefficient);
-		const [coefficient, resultExponent] = roundToScale(
-			[self.coefficient, self.exponent],
-			self.exponent + digits - precision,
-			Decimal.rounding,
-		);
-		if (Math.abs(resultExponent) > Decimal.exponentLimit) {
-			throw new RangeError(
-				`Decimal exponent out of range (±${Decimal.exponentLimit}): ${coefficient}e${resultExponent}`,
-			);
-		}
-		return new Decimal([coefficient, resultExponent]);
+		return new Decimal(roundToPrecision(self.raw, precision, Decimal.rounding));
 	}
 
 	// Normalized exponents with a non-negative field are exactly the integers.
@@ -203,7 +169,11 @@ const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
 		if (ye + digitsOf(yc) - 1 <= 15) {
 			const magnitude = abs(yc) * pow10(ye);
 			if (magnitude <= MAX_SAFE_EXPONENT) {
-				return integerPower(self, Number(yc < 0n ? -magnitude : magnitude));
+				return integerPower(
+					self,
+					Number(yc < 0n ? -magnitude : magnitude),
+					precision,
+				);
 			}
 		}
 	}
@@ -219,7 +189,6 @@ const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
 
 	// Chain path: a non-integer exponent, or an integer one beyond the
 	// safe-integer bound.
-	const exponentPair: RawDecimal = [yc, ye];
 	const negativeBase = self.coefficient < 0n;
 	const negated = negativeBase && ye === 0 && (yc & 1n) === 1n;
 
@@ -244,14 +213,14 @@ const powDecimals = (self: Decimal, exponent: DecimalLike): Decimal => {
 		);
 	}
 
-	const result = base.ln().times(exponentPair).exp();
+	const result = base.ln().times([yc, ye]).exp();
 	return negated ? new Decimal([-result.coefficient, result.exponent]) : result;
 };
 
 extend(
 	"pow",
 	function pow(this: Decimal, exponent: DecimalLike): Decimal {
-		return powDecimals(this, exponent);
+		return powDecimal(this, exponent);
 	},
 	["power"],
 );

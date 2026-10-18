@@ -47,7 +47,7 @@ extend(
 		// fraction back to exactly dp digits.
 		const digitCount = digitsOf(this.coefficient);
 		const [roundedCoefficient, roundedExponent] = roundToScale(
-			[this.coefficient, this.exponent],
+			this.raw,
 			this.exponent + digitCount - (dp + 1),
 			mode ?? Decimal.rounding,
 		);

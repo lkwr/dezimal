@@ -36,6 +36,12 @@ describe("extend", () => {
 		expect(Decimal.prototype.peek).toBe(tap);
 	});
 
+	it("keeps methods non-enumerable", () => {
+		extend("tap", tap);
+		expect(Object.keys(Decimal.prototype)).not.toContain("tap");
+		expect(Object.keys(new Decimal(1n))).toEqual(["coefficient", "exponent"]);
+	});
+
 	it("behaves normally when called through an alias", () => {
 		extend("tap", tap, ["peek"]);
 		const decimal = new Decimal(2n);

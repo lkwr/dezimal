@@ -31,13 +31,7 @@ extend(
 				`Invalid decimal places: expected a non-negative integer, got ${dp}`,
 			);
 		}
-		return new Decimal(
-			roundToScale(
-				[this.coefficient, this.exponent],
-				-dp,
-				mode ?? Decimal.rounding,
-			),
-		);
+		return new Decimal(roundToScale(this.raw, -dp, mode ?? Decimal.rounding));
 	},
 	["toDP"],
 );

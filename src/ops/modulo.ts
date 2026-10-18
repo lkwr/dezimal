@@ -1,7 +1,6 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
-import { normalize } from "../utils/common.ts";
+import { truncDivide } from "../utils/division.ts";
 import { extend } from "../utils/extend.ts";
-import { truncDivide } from "../utils/integer-division.ts";
 import { parse } from "../utils/parse.ts";
 
 declare module "dezi" {
@@ -18,10 +17,7 @@ declare module "dezi" {
 extend(
 	"modulo",
 	function modulo(this: Decimal, other: DecimalLike): Decimal {
-		const { remainder } = truncDivide(
-			normalize(parse(this)),
-			normalize(parse(other)),
-		);
+		const { remainder } = truncDivide(this.raw, parse(other));
 		return new Decimal(remainder);
 	},
 	["mod"],

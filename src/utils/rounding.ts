@@ -1,6 +1,6 @@
 import type { RoundingMode } from "dezi";
 import type { RawDecimal } from "../decimal.ts";
-import { abs, normalize, pow10 } from "./common.ts";
+import { abs, digitsOf, normalize, pow10 } from "./common.ts";
 
 export type RoundingDecision = {
 	/** Any nonzero part was truncated away. */
@@ -9,11 +9,9 @@ export type RoundingDecision = {
 	overHalf: boolean;
 	/** The discarded part sits exactly at the halfway point. */
 	atHalf: boolean;
-	/** The truncated coefficient is odd; drives the half-even tie. */
+	/** The truncated magnitude is odd; drives the half-even tie. */
 	isOdd: boolean;
-	/** The coefficient's sign is positive (ceil/towards +Infinity semantics). */
-	positive: boolean;
-	/** The coefficient's sign is negative (floor/towards −Infinity semantics). */
+	/** The rounded value is negative; drives the ceil/floor family. */
 	negative: boolean;
 };
 
@@ -26,7 +24,7 @@ export type RoundingDecision = {
  */
 export const roundingIncrement = (
 	mode: RoundingMode,
-	{ discarded, overHalf, atHalf, isOdd, positive, negative }: RoundingDecision,
+	{ discarded, overHalf, atHalf, isOdd, negative }: RoundingDecision,
 ): boolean => {
 	switch (mode) {
 		case "up":
@@ -34,7 +32,7 @@ export const roundingIncrement = (
 		case "down":
 			return false;
 		case "ceil":
-			return discarded && positive;
+			return discarded && !negative;
 		case "floor":
 			return discarded && negative;
 		case "half-up":
@@ -44,10 +42,33 @@ export const roundingIncrement = (
 		case "half-even":
 			return overHalf || (atHalf && isOdd);
 		case "half-ceil":
-			return overHalf || (atHalf && positive);
+			return overHalf || (atHalf && !negative);
 		case "half-floor":
 			return overHalf || (atHalf && negative);
 	}
+};
+
+/**
+ * Rounds the exact quotient `numerator / denominator` of two non-negative
+ * integers to an integer magnitude according to `mode`; `negative` is the
+ * sign the caller attaches to the result.
+ */
+export const roundQuotient = (
+	numerator: bigint,
+	denominator: bigint,
+	negative: boolean,
+	mode: RoundingMode,
+): bigint => {
+	const quotient = numerator / denominator;
+	const twice = (numerator % denominator) * 2n;
+	const increment = roundingIncrement(mode, {
+		discarded: twice > 0n,
+		overHalf: twice > denominator,
+		atHalf: twice === denominator,
+		isOdd: (quotient & 1n) === 1n,
+		negative,
+	});
+	return increment ? quotient + 1n : quotient;
 };
 
 /**
@@ -62,38 +83,30 @@ export const roundToScale = (
 ): RawDecimal => {
 	const [coefficient, exponent] = value;
 
-	if (coefficient === 0n) {
-		return [0n, 0];
-	}
-
 	// Already on the grid of 10^targetExponent: nothing to round away. Not
 	// materializing pow10 here keeps giant targetExponent inputs cheap.
-	if (exponent >= targetExponent) {
+	if (coefficient === 0n || exponent >= targetExponent) {
 		return normalize(value);
 	}
 
-	const scale = pow10(targetExponent - exponent);
-	const magnitude = abs(coefficient);
-	const sign = coefficient < 0n ? -1n : 1n;
-	let q = magnitude / scale; // BigInt division truncates towards zero
-	const r = magnitude % scale;
-
-	const discarded = r > 0n;
-	const overHalf = r * 2n > scale;
-	const atHalf = r * 2n === scale;
-	if (
-		roundingIncrement(mode, {
-			discarded,
-			overHalf,
-			atHalf,
-			isOdd: (q & 1n) === 1n,
-			positive: sign > 0n,
-			negative: sign < 0n,
-		})
-	) {
-		q += 1n;
-	}
-
+	const negative = coefficient < 0n;
+	const magnitude = roundQuotient(
+		abs(coefficient),
+		pow10(targetExponent - exponent),
+		negative,
+		mode,
+	);
 	// normalize absorbs a carry such as 999 -> 1000.
-	return normalize([sign * q, targetExponent]);
+	return normalize([negative ? -magnitude : magnitude, targetExponent]);
 };
+
+/**
+ * Rounds `value` to `digits` significant digits according to `mode`,
+ * returning a normalized RawDecimal.
+ */
+export const roundToPrecision = (
+	value: RawDecimal,
+	digits: number,
+	mode: RoundingMode,
+): RawDecimal =>
+	roundToScale(value, value[1] + digitsOf(value[0]) - digits, mode);

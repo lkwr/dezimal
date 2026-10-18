@@ -2,7 +2,7 @@ import { Decimal, type DecimalLike } from "../decimal.ts";
 import { extendStatic } from "../utils/extend.ts";
 
 // required extensions
-import "../ops/plus.ts";
+import "./plus.ts";
 
 declare module "dezi" {
 	interface DecimalConstructor {

@@ -60,3 +60,18 @@ describe("normalize", () => {
 		expect(normalize([0n, -5])).toEqual([0n, 0]);
 	});
 });
+
+describe("normalize (long zero runs)", () => {
+	it("strips any number of trailing zeros", () => {
+		for (const zeros of [1, 2, 3, 7, 8, 9, 63, 64, 65, 1000]) {
+			expect(normalize([7n * 10n ** BigInt(zeros), -5])).toEqual([
+				7n,
+				zeros - 5,
+			]);
+		}
+	});
+
+	it("handles huge runs quickly", () => {
+		expect(normalize([-(10n ** 50_000n), 0])).toEqual([-1n, 50_000]);
+	});
+});

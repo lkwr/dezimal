@@ -40,7 +40,7 @@ extend(
 		const digits = digitsOf(this.coefficient);
 		return new Decimal(
 			roundToScale(
-				[this.coefficient, this.exponent],
+				this.raw,
 				this.exponent + digits - sd,
 				mode ?? Decimal.rounding,
 			),

@@ -1,11 +1,9 @@
 import { Decimal, type DecimalLike } from "../decimal.ts";
-import { normalize } from "../utils/common.ts";
 import { extend, extendStatic } from "../utils/extend.ts";
-import { parse } from "../utils/parse.ts";
 
 // required extensions
-import "../ops/ln.ts";
-import "../ops/divide.ts";
+import "./ln.ts";
+import "./divide.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -37,40 +35,37 @@ declare module "dezi" {
  * Computes the logarithm of `value` in `base` as the quotient of the two
  * public `ln()` results, so each logarithm and the final divide round to
  * `Decimal.precision` significant digits with the configured
- * `Decimal.rounding` mode. Extensions expose nothing below that precision,
- * unlike ln's in-file working digits, so the chain carries a worst case of
- * about two ulps instead of single-step correct rounding. The base defaults
- * to 10, mirroring decimal.js's common-logarithm default.
+ * `Decimal.rounding` mode. The chain therefore carries a worst case of about
+ * two ulps instead of single-step correct rounding.
  */
-const logDecimals = (value: DecimalLike, base?: DecimalLike): Decimal => {
-	const [c, e] = normalize(parse(value));
-	if (c <= 0n) {
+const logDecimal = (value: Decimal, base: DecimalLike): Decimal => {
+	if (value.coefficient <= 0n) {
 		throw new RangeError(
 			"Invalid Decimal operation: logarithm of a non-positive value",
 		);
 	}
-	const [b, eb] = normalize(parse(base ?? 10n));
-	if (b <= 0n) {
+	const divisor = new Decimal(base);
+	if (divisor.coefficient <= 0n) {
 		throw new RangeError(
 			"Invalid Decimal operation: logarithm of a non-positive base",
 		);
 	}
-	if (b === 1n && eb === 0) {
+	if (divisor.coefficient === 1n && divisor.exponent === 0) {
 		throw new RangeError(
 			"Invalid Decimal operation: logarithm base equal to 1",
 		);
 	}
-	return new Decimal([c, e]).ln().divide(new Decimal([b, eb]).ln());
+	return value.ln().divide(divisor.ln());
 };
 
 extend("log", function log(this: Decimal, base?: DecimalLike): Decimal {
-	return logDecimals(this, base);
+	return logDecimal(this, base ?? 10n);
 });
 
 extendStatic("log2", function log2(value: DecimalLike): Decimal {
-	return logDecimals(value, 2n);
+	return logDecimal(new Decimal(value), 2n);
 });
 
 extendStatic("log10", function log10(value: DecimalLike): Decimal {
-	return logDecimals(value, 10n);
+	return logDecimal(new Decimal(value), 10n);
 });

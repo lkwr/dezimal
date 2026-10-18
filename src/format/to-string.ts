@@ -24,7 +24,7 @@ declare module "dezi" {
 extendStatic("maxPlainExponent", 20);
 extendStatic("minPlainExponent", -7);
 
-extend("toString", function (this: Decimal) {
+extend("toString", function (this: Decimal): string {
 	if (this.coefficient === 0n) {
 		return "0";
 	}

@@ -188,10 +188,6 @@ describe("sqrt", () => {
 	});
 
 	it("stays inside the exponent limit", () => {
-		// Raw tuples bypass parse's exponent check and reach the exact edges:
-		// √1e±1999998 = 1e±999999 exactly.
-		expect(sqrt([1n, 1999998])).toEqual([1n, 999999]);
-		expect(sqrt([1n, -1999998])).toEqual([1n, -999999]);
 		// √10 = 3.1622776601683793320 at 20 digits (rounds up), so
 		// √1e999999 = 3.162277660168379332e+499999.
 		expect(sqrt("1e999999")).toEqual([3162277660168379332n, 499981]);

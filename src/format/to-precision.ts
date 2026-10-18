@@ -36,7 +36,7 @@ extend(
 		}
 		const digitCount = digitsOf(this.coefficient);
 		const [roundedCoefficient, roundedExponent] = roundToScale(
-			[this.coefficient, this.exponent],
+			this.raw,
 			this.exponent + digitCount - sd,
 			mode ?? Decimal.rounding,
 		);

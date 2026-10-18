@@ -36,6 +36,22 @@ describe("compare (static)", () => {
 		expect(Decimal.compare("0", "0.0")).toBe(0);
 	});
 
+	it("always returns -1, 0 or 1", () => {
+		expect(Decimal.compare(100, 1)).toBe(1);
+		expect(Decimal.compare("1e-50", "1e50")).toBe(-1);
+		expect(Decimal.compare("-1e50", "-1e-50")).toBe(-1);
+		expect(Decimal.compare("-1e-50", "-1e50")).toBe(1);
+		expect(Decimal.compare(0, "-1e-50")).toBe(1);
+		expect(Decimal.compare("-123e10", 0)).toBe(-1);
+	});
+
+	it("aligns same-magnitude values with different exponents", () => {
+		expect(Decimal.compare("1.25", "1.3")).toBe(-1);
+		expect(Decimal.compare("1.3", "1.25")).toBe(1);
+		expect(Decimal.compare("-1.25", "-1.3")).toBe(1);
+		expect(Decimal.compare("99.5", 99)).toBe(1);
+	});
+
 	it("registers both sides on the same extension module", () => {
 		expect(Decimal.compare).toBeTypeOf("function");
 		expect(Decimal.prototype.compare).toBeTypeOf("function");

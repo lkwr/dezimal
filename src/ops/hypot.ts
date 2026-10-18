@@ -1,27 +1,32 @@
-import { Decimal, type DecimalLike } from "../decimal.ts";
+import { Decimal, type DecimalLike, type RawDecimal } from "../decimal.ts";
+import { addRaw } from "../utils/common.ts";
 import { extendStatic } from "../utils/extend.ts";
+import { rootToPrecision } from "../utils/integer-roots.ts";
+import { parse } from "../utils/parse.ts";
+import { currentPrecision } from "../utils/precision.ts";
 
 // required extensions
-import "../ops/plus.ts";
-import "../ops/sqrt.ts";
-import "../ops/times.ts";
+import "../config/rounding-modes.ts";
 
 declare module "dezi" {
 	interface DecimalConstructor {
 		/**
 		 * Returns the square root of the sum of the squares of the given
 		 * values, rounded to `Decimal.precision` significant digits using the
-		 * `Decimal.rounding` mode.
+		 * `Decimal.rounding` mode. The sum of squares is exact and may exceed
+		 * the exponent limit as long as the result does not.
 		 */
 		hypot(...values: DecimalLike[]): Decimal;
 	}
 }
 
 extendStatic("hypot", function hypot(...values: DecimalLike[]): Decimal {
-	return values
-		.reduce<Decimal>(
-			(total, value) => total.plus(new Decimal(value).times(value)),
-			new Decimal(0),
-		)
-		.sqrt();
+	let sum: RawDecimal = [0n, 0];
+	for (const value of values) {
+		const [coefficient, exponent] = parse(value);
+		sum = addRaw(sum, [coefficient * coefficient, 2 * exponent]);
+	}
+	return new Decimal(
+		rootToPrecision(sum, 2, currentPrecision(), Decimal.rounding),
+	);
 });

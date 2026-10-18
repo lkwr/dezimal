@@ -29,13 +29,10 @@ extend(
 			);
 		}
 		// The on-grid early return in roundToScale keeps huge dp cheap;
-		// toPlainString(dp) pads the fraction to exactly dp digits.
+		// The rounded value has at most dp fraction digits, which toPlainString(dp)
+		// pads to exactly dp.
 		return new Decimal(
-			roundToScale(
-				[this.coefficient, this.exponent],
-				-dp,
-				mode ?? Decimal.rounding,
-			),
+			roundToScale(this.raw, -dp, mode ?? Decimal.rounding),
 		).toPlainString(dp);
 	},
 );

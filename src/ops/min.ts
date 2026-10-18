@@ -28,5 +28,5 @@ extendStatic("min", function min(...values: DecimalLike[]): Decimal {
 		if (candidate.compare(winner) < 0) winner = candidate;
 	}
 
-	return new Decimal(winner);
+	return winner;
 });

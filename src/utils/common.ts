@@ -6,16 +6,33 @@ export const pow10 = (exponent: number): bigint => TEN ** BigInt(exponent);
 
 export const abs = (value: bigint): bigint => (value < 0n ? -value : value);
 
-/** Strips trailing zeros from the coefficient, adjusting the exponent. */
-export const normalize = ([coefficient, exponent]: RawDecimal): RawDecimal => {
-	if (coefficient === 0n) {
-		return [0n, 0];
+/**
+ * Strips trailing zeros from the coefficient, adjusting the exponent. Most
+ * coefficients end in a nonzero digit and return after a single check; long
+ * zero runs are stripped in doubling chunks of 10^1, 10^2, 10^4, … and the
+ * rest is bisected back down, so a run of n zeros costs O(log n) divisions
+ * instead of n.
+ */
+export const normalize = (value: RawDecimal): RawDecimal => {
+	const [coefficient, exponent] = value;
+	if (coefficient === 0n) return exponent === 0 ? value : [0n, 0];
+	if (coefficient % TEN !== 0n) return value;
+
+	let c = coefficient / TEN;
+	let e = exponent + 1;
+	let step = 1;
+	for (let chunk = TEN; c % chunk === 0n; chunk *= chunk) {
+		c /= chunk;
+		e += step;
+		step *= 2;
 	}
-	let c = coefficient;
-	let e = exponent;
-	while (c % TEN === 0n) {
-		c /= TEN;
-		e += 1;
+	// Fewer than `step` zeros remain: strip them by binary decomposition.
+	for (step >>= 1; step > 0; step >>= 1) {
+		const chunk = pow10(step);
+		if (c % chunk === 0n) {
+			c /= chunk;
+			e += step;
+		}
 	}
 	return [c, e];
 };

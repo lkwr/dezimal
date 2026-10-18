@@ -10,7 +10,5 @@ declare module "dezi" {
 }
 
 extend("ceil", function ceil(this: Decimal): Decimal {
-	return new Decimal(
-		roundToScale([this.coefficient, this.exponent], 0, "ceil"),
-	);
+	return new Decimal(roundToScale(this.raw, 0, "ceil"));
 });

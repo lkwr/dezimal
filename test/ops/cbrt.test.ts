@@ -272,20 +272,13 @@ describe("cbrt", () => {
 	});
 
 	it("stays inside the exponent limit", () => {
-		// Raw tuples bypass parse's exponent check and reach the exact edges:
-		// ∛1e±1999998 = 1e±666666 exactly.
-		expect(cbrt([1n, 1999998])).toEqual([1n, 666666]);
-		expect(cbrt([1n, -1999998])).toEqual([1n, -666666]);
-		// ∛1e2999997 = 1e999999 exactly, right at the limit.
-		expect(cbrt([1n, 2999997])).toEqual([1n, 999999]);
-		expect(cbrt([1n, -2999997])).toEqual([1n, -999999]);
 		// ∛1e999999 = 1e333333 exactly, since 999999 = 3·333333.
 		expect(cbrt("1e999999")).toEqual([1n, 333333]);
 		expect(cbrt("1e-999999")).toEqual([1n, -333333]);
 	});
 
 	it("throws outside the exponent limit", () => {
-		// ∛1e3000000 = 1e1000000, one decade past the limit.
+		// Values beyond the limit cannot be constructed in the first place.
 		expect(() => cbrt([1n, 3000000])).toThrow(RangeError);
 		expect(() => cbrt([1n, 3000000])).toThrow("exponent out of range");
 		expect(() => cbrt([1n, -3000000])).toThrow(RangeError);

@@ -1,4 +1,3 @@
-import { normalize } from "./utils/common.ts";
 import { parse } from "./utils/parse.ts";
 
 export type RawDecimal = [coefficient: bigint, exponent: number];
@@ -17,6 +16,10 @@ export interface Decimal {
 export type DecimalLike = string | number | bigint | Decimal | RawDecimal;
 
 export interface DecimalConstructor {
+	/**
+	 * Largest magnitude of a normalized exponent. Constructing a value or
+	 * computing a result beyond `±exponentLimit` throws a RangeError.
+	 */
 	exponentLimit: number;
 
 	readonly prototype: Decimal;
@@ -31,7 +34,7 @@ class DecimalImpl {
 	readonly exponent: number;
 
 	constructor(decimal: DecimalLike) {
-		[this.coefficient, this.exponent] = normalize(parse(decimal));
+		[this.coefficient, this.exponent] = parse(decimal);
 	}
 
 	get raw(): RawDecimal {

@@ -1,62 +1,58 @@
-import type { Decimal, DecimalLike } from "../decimal.ts";
-import { abs, normalize } from "../utils/common.ts";
+import type { Decimal, DecimalLike, RawDecimal } from "../decimal.ts";
+import { digitsOf, pow10 } from "../utils/common.ts";
 import { extend, extendStatic } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 
 declare module "dezi" {
 	interface Decimal {
 		/** Returns -1, 0 or 1 as this value is smaller than, equal to or bigger than `other`. */
-		compare(other: DecimalLike): number;
+		compare(other: DecimalLike): -1 | 0 | 1;
 	}
 
 	interface DecimalConstructor {
 		/** Returns -1, 0 or 1 as `a` is smaller than, equal to or bigger than `b`. */
-		compare(a: DecimalLike, b: DecimalLike): number;
+		compare(a: DecimalLike, b: DecimalLike): -1 | 0 | 1;
 	}
 }
 
-const sign = (coefficient: bigint): number =>
-	coefficient < 0n ? -1 : coefficient > 0n ? 1 : 0;
+const order = (a: bigint, b: bigint): -1 | 0 | 1 =>
+	a < b ? -1 : a > b ? 1 : 0;
 
-/** Compares the magnitude of two same-sign (possibly zero) decimals. */
-const compareMagnitude = (
-	[aCoefficient, aExponent]: [bigint, number],
-	[bCoefficient, bExponent]: [bigint, number],
-): number => {
-	const aDigits = abs(aCoefficient).toString();
-	const bDigits = abs(bCoefficient).toString();
+/** Orders two normalized raw decimals. */
+const compareRaw = (
+	[aCoefficient, aExponent]: RawDecimal,
+	[bCoefficient, bExponent]: RawDecimal,
+): -1 | 0 | 1 => {
+	// Equal exponents (including zero against zero) compare coefficients.
+	if (aExponent === bExponent) return order(aCoefficient, bCoefficient);
 
-	// The digit count plus the exponent orders the absolute values, e.g.
-	// "9.99" (3 digits, -2) vs "10" (2 digits, 0) -> 1 vs 2. Comparing the
-	// padded digit strings breaks ties without multiplying big exponents out.
-	const order = aDigits.length - bDigits.length + aExponent - bExponent;
-	if (order !== 0) return order;
-
-	const width = Math.max(aDigits.length, bDigits.length);
-	const aPadded = aDigits.padEnd(width, "0");
-	const bPadded = bDigits.padEnd(width, "0");
-	return aPadded < bPadded ? -1 : aPadded > bPadded ? 1 : 0;
-};
-
-const compareDecimals = (a: DecimalLike, b: DecimalLike): number => {
-	const aRaw = normalize(parse(a));
-	const bRaw = normalize(parse(b));
-
-	const aSign = sign(aRaw[0]);
-	const bSign = sign(bRaw[0]);
+	// Differing signs (zero counting as its own sign) decide outright.
+	const aSign = order(aCoefficient, 0n);
+	const bSign = order(bCoefficient, 0n);
 	if (aSign !== bSign) return aSign < bSign ? -1 : 1;
 
-	const magnitude = compareMagnitude(aRaw, bRaw);
-	return aSign < 0 ? -magnitude : magnitude;
+	// Same nonzero sign: the leading digit positions order the magnitudes.
+	const leading =
+		digitsOf(aCoefficient) + aExponent - digitsOf(bCoefficient) - bExponent;
+	if (leading !== 0) return leading > 0 === aSign > 0 ? 1 : -1;
+
+	// Same leading position: the exponent gap equals the digit-count gap, so
+	// aligning the coefficients costs at most one coefficient's width.
+	return aExponent > bExponent
+		? order(aCoefficient * pow10(aExponent - bExponent), bCoefficient)
+		: order(aCoefficient, bCoefficient * pow10(bExponent - aExponent));
 };
 
-extend("compare", function compare(this: Decimal, other: DecimalLike): number {
-	return compareDecimals(this, other);
+extend("compare", function compare(this: Decimal, other: DecimalLike):
+	| -1
+	| 0
+	| 1 {
+	return compareRaw(this.raw, parse(other));
 });
 
-extendStatic(
-	"compare",
-	function compare(a: DecimalLike, b: DecimalLike): number {
-		return compareDecimals(a, b);
-	},
-);
+extendStatic("compare", function compare(a: DecimalLike, b: DecimalLike):
+	| -1
+	| 0
+	| 1 {
+	return compareRaw(parse(a), parse(b));
+});
