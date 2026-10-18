@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build } from "tsdown";
 import packageJson from "./package.json" with { type: "json" };
@@ -11,10 +11,19 @@ await mkdir(path("./dist"));
 const distPackageJson = {
 	name: packageJson.name,
 	version: packageJson.version,
-	type: packageJson.type,
+	description: packageJson.description,
+	keywords: packageJson.keywords,
 	author: packageJson.author,
 	license: packageJson.license,
+	repository: packageJson.repository,
+	homepage: packageJson.homepage,
+	bugs: packageJson.bugs,
 
+	type: packageJson.type,
+	// Fallback for resolvers without `exports` support (TypeScript's legacy
+	// "node" resolution); subpaths resolve as plain files there.
+	main: "./index.js",
+	types: "./index.d.ts",
 	exports: {
 		".": "./index.js",
 		"./ops/*": "./ops/*.js",
@@ -23,6 +32,8 @@ const distPackageJson = {
 		"./config/*": "./config/*.js",
 		"./preset/*": "./preset/*.js",
 	},
+	// Deliberately no `sideEffects: false`: extensions register themselves on
+	// import, so bundlers must keep every imported module.
 };
 
 await build({
@@ -42,6 +53,10 @@ await build({
 });
 
 await writeFile(
-	"./dist/package.json",
-	JSON.stringify(distPackageJson, null, 2),
+	path("./dist/package.json"),
+	`${JSON.stringify(distPackageJson, null, 2)}\n`,
 );
+
+for (const file of ["README.md", "LICENSE"]) {
+	await copyFile(path(file), path(`./dist/${file}`));
+}
