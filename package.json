@@ -1,6 +1,6 @@
 {
 	"name": "dezi",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"private": true,
 	"type": "module",
 	"description": "A lightweight arbitrary-precision Decimal library",
@@ -36,12 +36,12 @@
 
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",
-		"@types/node": "^26.6.4",
+		"@types/node": "^26.6.5",
 		"decimal.js": "^10.6.0",
-		"rolldown": "^1.2.12",
-		"tsdown": "^0.23.0",
+		"rolldown": "^1.2.14",
+		"tsdown": "^0.23.1",
 		"typescript": "^6.0.3",
-		"vitest": "^5.0.3"
+		"vitest": "^5.0.5"
 	},
 	"devEngines": {
 		"runtime": {
