@@ -33,6 +33,7 @@ These apply before anything else and are deliberate deviations from decimal.js:
   - any result whose normalized exponent leaves `±Decimal.exponentLimit` (overflow **and** underflow, e.g. `times`, `pow`, `exp`, `divide`) → `RangeError`; checked centrally in parse/construction
   - `divide-integer` / `modulo` with zero divisor → `RangeError`
 - **No negative zero.** Zero is always `[0n, 0]` (already guaranteed by normalization).
+- **No implicit numeric coercion.** The core's `Symbol.toPrimitive` converts only in string contexts (template literals, `String(value)`); `a < b`, `a + b` and `+a` throw a `TypeError` instead of silently comparing or concatenating strings.
 - **Parity delta:** decimal.js's `isNaN()` and `isFinite()` predicates are **excluded** — under the invariant above they'd be constants. `isNegative()`, `isPositive()`, `isZero()`, `isInteger()` are kept.
 
 ## Extensions by folder
@@ -143,7 +144,7 @@ All precision-based; domain violations throw.
 | `is-integer`  | I     | `isInteger` (alias `isInt`)  | instance `isInteger` (alias `isInt`)  | predicate, full | P1       | ✅ (`exponent >= 0`)      |
 | `is-negative` | I     | `isNegative` (alias `isNeg`) | instance `isNegative` (alias `isNeg`) | predicate, full | P1       | ✅ (zero is not negative) |
 | `is-positive` | I     | `isPositive` (alias `isPos`) | instance `isPositive` (alias `isPos`) | predicate, full | P1       | ✅ (zero is not positive) |
-| `is-decimal`  | S     | `isDecimal(value)`           | static `Decimal.isDecimal(object)`    | predicate, full | P3       | ⬜ (type guard)           |
+| `is-decimal`  | S     | `isDecimal(value)`           | static `Decimal.isDecimal(object)`    | predicate, full | P3       | ✅ (static type guard) |
 
 #### Digit counts
 
@@ -164,9 +165,10 @@ All precision-based; domain violations throw.
 | `to-fixed`        | I     | `toFixed(dp?, mode?)`            | instance `toFixed(dp?, rm?)`; no static                                                                  | rounding, format, full | P1       | ✅ (omitted `dp` → exact plain expansion) |
 | `to-exponential`  | I     | `toExponential(dp?, rm?)`        | instance `toExponential(dp?, rm?)`; no static                                                            | format, full           | P2       | ✅ (reuses `utils/string.ts`)             |
 | `to-precision`    | I     | `toPrecision(sd?, rm?)`          | instance `toPrecision(sd?, rm?)`; no static                                                              | format, full           | P2       | ✅                                        |
-| `to-json`         | I     | `toJSON`                         | instance `toJSON` (= `valueOf`); no static                                                               | format, full           | P3       | ⬜                                        |
-| `value-of`        | I     | `valueOf`                        | instance `valueOf` (like `toString` but keeps `−0`; dezi ≡ `toString`); no static                        | format, full           | P3       | ⬜                                        |
+| `to-json`         | I     | `toJSON`                         | instance `toJSON` (= `valueOf`); no static                                                               | format, full           | P3       | ✅ (same string as `toString`) |
+| `value-of`        | —     | — (core `Symbol.toPrimitive`)    | instance `valueOf` (like `toString` but keeps `−0`)                                                      | —                      | —        | ❌ replaced: the core converts in string contexts and throws on numeric/default coercion |
 | `to-fraction`     | I     | `toFraction(maxDenominator?)`    | instance `toFraction(max_denominator?)` → `[Decimal, Decimal]`; dezi plans `[bigint, bigint]`; no static | format, full           | P3       | ⬜                                        |
+| `to-big-int`      | I     | `toBigInt()`                     | — (dezi-native)                                                                                          | full                   | P3       | ✅ (throws for non-integers)              |
 
 #### Base-radix output
 
@@ -198,7 +200,7 @@ The rounding modes: `RoundingMode = "up" | "down" | "ceil" | "floor" | "half-up"
 | `full` ✅       | every extension (already exists)                              | P0       |
 | `basic` ✅      | arithmetic + `compare` + `max`/`min` + basic format           | P0       |
 | `predicate` ✅  | comparison sugar + booleans + `sign`                          | P1       |
-| `rounding`      | quantization family + modes                                   | P1       |
+| `rounding` ✅   | quantization family + modes                                   | P1       |
 | `format` ✅     | string/number conversions                                     | P1       |
 | `power` ✅      | roots, powers, exp/log family                                 | P2       |
 | `trigonometric` | trig + inverse trig                                           | P3       |
@@ -206,7 +208,7 @@ The rounding modes: `RoundingMode = "up" | "down" | "ceil" | "floor" | "half-up"
 | `bases`         | binary/octal/hexadecimal conversion                           | P3       |
 | `config` ✅     | config statics (modes, `precision`, `set`, `clone`, `random`) | P3       |
 
-All ten preset files exist in `src/preset/` and build to `dist/preset/*`. The ones marked ✅ import live extensions today; `trigonometric`, `hyperbolic` and `bases` remain documented placeholders (no-ops) that fill up as their families land.
+The presets marked ✅ exist in `src/preset/` and build to `dist/preset/*`; `trigonometric`, `hyperbolic` and `bases` are created together with their first extension (no empty placeholder files are published).
 
 Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports so consumers can still import single extensions instead (`./ops/plus`, `./check/compare`, `./format/to-string`, `./config/precision`, …).
 
@@ -222,7 +224,7 @@ Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports 
    - `modulo` (mode used by modulo division — decimal.js's EUCLID slot) → ⬜ P3
    - `crypto` (entropy source for `random`) → ⬜ P3
    - `noConflict()` → excluded (UMD-era global cleanup, meaningless for ESM)
-3. **`Decimal.clone()` design question.** decimal.js `clone(props)` returns a whole new constructor class with its own configuration. dezi currently has a single class with mutable statics. Options: (a) skip parity and keep one configured global, (b) `clone` returning a `DecimalConstructor` facade with overridden config. Decide at implementation time — blockers: none.
+3. **`Decimal.clone()` design question.** decimal.js `clone(props)` returns a whole new constructor class with its own configuration. dezi has a single class with mutable statics, and covers the main use case — code that must not depend on (or leak into) the global configuration — with per-call `PrecisionOptions` (`x.divide(y, { precision: 50, rounding: "half-even" })`) on every precision-based op. `clone` is therefore likely to be skipped; revisit only on concrete demand.
 4. **Naming & alias policy.** dezi picks its own consistent verb-style names instead of inheriting decimal.js's mixed scheme (short operator names `plus`/`minus`/`times`, participles like `dividedBy`, descriptives like `squareRoot`/`toPower`). Rules: primaries are short verbs (`divide`, `pow`, `sqrt`, `negate`), boolean predicates drop decimal.js's trailing `To` (`lessThanOrEqual`, not `lessThanOrEqualTo`), and aliases are shorter equivalents without filler words (`div`, `sub`, `gt`). decimal.js names stay in the tables only as parity-audit references; conversion methods keep the JS-native `to*` family (`toString`, `toFixed`, …).
 5. **Static surface policy.** Statics are the exception, not the rule: they exist only for operations that have no instance receiver (aggregators `max`, `min`, `sum`, `hypot` and `arctan2` ship static-only, like decimal.js) and for a small two-sided allowlist (`compare`, which set the precedent). dezi does **not** provide static mirrors of instance operations — decimal.js's `Decimal.add(x, y)`-style surface is a deliberate parity delta; the instance method is the API.
 6. **Instance property surface.** decimal.js instances expose internal fields `d`/`e`/`s` (digits array, exponent, sign, all best treated read-only). dezi instances expose `coefficient`, `exponent` and `raw`, which cover the same information; `d`/`e`/`s` aliases are not planned.
@@ -231,7 +233,7 @@ Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports 
 
 ## Milestones
 
-- **v0.1 — Arithmetic core complete (P0).** ✅ Rounding modes + `precision`, `divide`, plus presets scaffolded; remaining: README docs on exact vs precision-based ops.
+- **v0.1 — Arithmetic core complete (P0).** ✅ Rounding modes + `precision`, `divide`, plus presets scaffolded; README documents exact vs precision-based ops.
 - **v0.2 — Everyday usability (P1).** ✅ Quantization family (`floor`/`ceil`/`truncate`/`round`/`to-decimal-places`/`clamp`), `to-fixed`/`to-number`, comparison sugar + booleans + `sign`, `max`/`min`/`sum`, `sqrt`; `predicate`/`rounding`/`format` presets filled (only `to-nearest` deferred to P2).
 - **v0.3 — Advanced math (P2).** ✅ `pow`, `cbrt`, `exp`, `ln`, `log`, `hypot`, `to-nearest`, `to-significant-digits`, digit counts (`decimal-places`, `significant-digits`), `to-exponential`/`to-precision`; `power` preset filled; `ln10` config static.
 - **v0.4 — Transcendental completeness (P3).** Trigonometric + hyperbolic families; `trigonometric`/`hyperbolic` presets.
@@ -239,4 +241,4 @@ Presets ship as `./preset/<name>` subpaths; each lists only side-effect imports 
 
 ---
 
-Status: 49 of 71 planned extension modules shipped, grouped into 10 presets.
+Status: 51 of 71 planned extension modules shipped, grouped into 7 presets.
