@@ -284,3 +284,12 @@ describe("cbrt", () => {
 		expect(() => cbrt([1n, -3000000])).toThrow(RangeError);
 	});
 });
+
+describe("cbrt options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(2).cbrt({ precision: 5 }).toString()).toBe("1.2599");
+		expect(
+			new Decimal(2).cbrt({ precision: 5, rounding: "up" }).toString(),
+		).toBe("1.26");
+	});
+});

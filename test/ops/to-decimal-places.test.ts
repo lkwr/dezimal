@@ -81,3 +81,11 @@ describe("toDecimalPlaces", () => {
 		expect(value.toDP(2).toString()).toBe("1.23");
 	});
 });
+
+describe("toDecimalPlaces mode validation", () => {
+	it("rejects unknown rounding modes", () => {
+		expect(() =>
+			new Decimal("1.25").toDecimalPlaces(1, "nearest" as RoundingMode),
+		).toThrow(RangeError);
+	});
+});

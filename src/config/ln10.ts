@@ -13,7 +13,7 @@ declare module "dezi" {
 		 * exact bigint comparisons; override it like `Decimal.precision` to
 		 * raise the pinned digits.
 		 */
-		ln10: Decimal;
+		ln10: import("dezi").Decimal;
 	}
 }
 

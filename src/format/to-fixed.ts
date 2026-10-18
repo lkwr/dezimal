@@ -1,5 +1,6 @@
 import type { RoundingMode } from "dezi";
 import { Decimal } from "../decimal.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 
@@ -32,7 +33,7 @@ extend(
 		// The rounded value has at most dp fraction digits, which toPlainString(dp)
 		// pads to exactly dp.
 		return new Decimal(
-			roundToScale(this.raw, -dp, mode ?? Decimal.rounding),
+			roundToScale(this.raw, -dp, currentRounding(mode)),
 		).toPlainString(dp);
 	},
 );

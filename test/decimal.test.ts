@@ -127,3 +127,19 @@ describe("errors", () => {
 		expect(() => new Decimal("1e-1000000")).toThrow(RangeError);
 	});
 });
+
+describe("primitive conversion", () => {
+	it("throws on numeric and default coercion", () => {
+		const one = new Decimal(1);
+		const two = new Decimal(2);
+		expect(() => one < two).toThrow(TypeError);
+		expect(() => +one).toThrow(TypeError);
+		// biome-ignore lint/style/useTemplate: exercising default coercion
+		expect(() => "total: " + one).toThrow(TypeError);
+	});
+
+	it("converts in string contexts", () => {
+		// Without the to-string extension the tag-based object string is used.
+		expect(String(new Decimal(1))).toBe("[object Decimal]");
+	});
+});

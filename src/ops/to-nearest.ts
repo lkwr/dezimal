@@ -1,6 +1,7 @@
 import type { RoundingMode } from "dezi";
 import { Decimal, type DecimalLike } from "../decimal.ts";
 import { abs, pow10 } from "../utils/common.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { parse } from "../utils/parse.ts";
 import { roundQuotient } from "../utils/rounding.ts";
@@ -45,13 +46,13 @@ extend(
 						abs(a) * pow10(ea - eb),
 						abs(b),
 						negative,
-						mode ?? Decimal.rounding,
+						currentRounding(mode),
 					)
 				: roundQuotient(
 						abs(a),
 						abs(b) * pow10(eb - ea),
 						negative,
-						mode ?? Decimal.rounding,
+						currentRounding(mode),
 					);
 
 		// The result is the exact product k × base.

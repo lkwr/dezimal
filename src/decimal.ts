@@ -11,6 +11,14 @@ export interface Decimal {
 	readonly exponent: number;
 	readonly raw: RawDecimal;
 	readonly [Symbol.toStringTag]: string;
+	/**
+	 * Converts to a string in string contexts (template literals,
+	 * `String(value)`) via `toString()`. Numeric and default coercion throw a
+	 * TypeError, so `a < b` or `a + b` fail loudly instead of silently
+	 * comparing or concatenating strings; use the explicit operations or
+	 * `toNumber()`.
+	 */
+	[Symbol.toPrimitive](hint: string): string;
 }
 
 export type DecimalLike = string | number | bigint | Decimal | RawDecimal;
@@ -43,6 +51,15 @@ class DecimalImpl {
 
 	get [Symbol.toStringTag]() {
 		return "Decimal";
+	}
+
+	[Symbol.toPrimitive](hint: string): string {
+		if (hint === "string") {
+			return this.toString();
+		}
+		throw new TypeError(
+			`Cannot convert a Decimal to a ${hint} primitive: use explicit operations, toString() or toNumber()`,
+		);
 	}
 }
 

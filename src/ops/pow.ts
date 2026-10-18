@@ -1,15 +1,16 @@
+import type { PrecisionOptions, RoundingMode } from "dezi";
 import { Decimal, type DecimalLike, type RawDecimal } from "../decimal.ts";
 import { abs, digitsOf, pow10 } from "../utils/common.ts";
+import { currentPrecision, currentRounding } from "../utils/config.ts";
 import { divideToPrecision } from "../utils/division.ts";
 import { expToPrecision } from "../utils/exponential.ts";
 import { extend } from "../utils/extend.ts";
 import { lnToPrecision } from "../utils/logarithm.ts";
 import { exponentRangeError, parse } from "../utils/parse.ts";
-import { currentPrecision } from "../utils/precision.ts";
 import { roundApproximation, roundToPrecision } from "../utils/rounding.ts";
 
 // required extensions
-import "../config/rounding-modes.ts";
+import "../config/precision.ts";
 
 declare module "dezi" {
 	interface Decimal {
@@ -21,13 +22,14 @@ declare module "dezi" {
 		 * `Decimal.precision + 8` significant digits, and rounded to
 		 * `Decimal.precision` significant digits using the `Decimal.rounding`
 		 * mode. Any other exponent is computed as exp(exponent · ln(value))
-		 * and rounded to `Decimal.precision` significant digits.
+		 * and rounded to `Decimal.precision` significant digits. `options`
+		 * override the precision and rounding mode for this call.
 		 *
 		 * Throws a RangeError when zero is raised to a negative power, when a
 		 * negative base meets a non-integer exponent, or when the result
 		 * leaves the `Decimal.exponentLimit` range.
 		 */
-		pow(exponent: DecimalLike): Decimal;
+		pow(exponent: DecimalLike, options?: PrecisionOptions): Decimal;
 		/**
 		 * Returns this value raised to the given exponent.
 		 *
@@ -36,13 +38,14 @@ declare module "dezi" {
 		 * `Decimal.precision + 8` significant digits, and rounded to
 		 * `Decimal.precision` significant digits using the `Decimal.rounding`
 		 * mode. Any other exponent is computed as exp(exponent · ln(value))
-		 * and rounded to `Decimal.precision` significant digits.
+		 * and rounded to `Decimal.precision` significant digits. `options`
+		 * override the precision and rounding mode for this call.
 		 *
 		 * Throws a RangeError when zero is raised to a negative power, when a
 		 * negative base meets a non-integer exponent, or when the result
 		 * leaves the `Decimal.exponentLimit` range.
 		 */
-		power(exponent: DecimalLike): Decimal;
+		power(exponent: DecimalLike, options?: PrecisionOptions): Decimal;
 	}
 }
 
@@ -77,7 +80,7 @@ const multiplyStep = (
 	// beyond the limit plus this slack can never come back representable in
 	// the remaining steps.
 	const decade = exponent + digitsOf(coefficient) - 1;
-	const bound = Decimal.exponentLimit + Decimal.precision + 64;
+	const bound = Decimal.exponentLimit + keep + 56;
 	if (Math.abs(decade) > bound) {
 		throw exponentRangeError(decade);
 	}
@@ -96,6 +99,7 @@ const integerPower = (
 	self: Decimal,
 	exponent: number,
 	precision: number,
+	rounding: RoundingMode,
 ): Decimal => {
 	const keep = precision + 8;
 	let accumulator: RawDecimal = [1n, 0];
@@ -114,12 +118,10 @@ const integerPower = (
 	}
 	if (exponent < 0) {
 		return new Decimal(
-			divideToPrecision([1n, 0], accumulator, precision, Decimal.rounding),
+			divideToPrecision([1n, 0], accumulator, precision, rounding),
 		);
 	}
-	return new Decimal(
-		roundToPrecision(accumulator, precision, Decimal.rounding),
-	);
+	return new Decimal(roundToPrecision(accumulator, precision, rounding));
 };
 
 /**
@@ -127,7 +129,11 @@ const integerPower = (
  * taking the exact squaring path for safe-integer integer exponents and the
  * natural-logarithm chain for everything else.
  */
-const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
+const powDecimal = (
+	self: Decimal,
+	exponent: DecimalLike,
+	options: PrecisionOptions | undefined,
+): Decimal => {
 	const [yc, ye] = parse(exponent);
 
 	// x^0 = 1.
@@ -152,11 +158,12 @@ const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
 		return self;
 	}
 
-	const precision = currentPrecision();
+	const precision = currentPrecision(options?.precision);
+	const rounding = currentRounding(options?.rounding);
 
 	// x^1 = x on the `precision` digit grid.
 	if (yc === 1n && ye === 0) {
-		return new Decimal(roundToPrecision(self.raw, precision, Decimal.rounding));
+		return new Decimal(roundToPrecision(self.raw, precision, rounding));
 	}
 
 	// Normalized exponents with a non-negative field are exactly the integers.
@@ -172,6 +179,7 @@ const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
 					self,
 					Number(yc < 0n ? -magnitude : magnitude),
 					precision,
+					rounding,
 				);
 			}
 		}
@@ -232,15 +240,19 @@ const powDecimal = (self: Decimal, exponent: DecimalLike): Decimal => {
 		roundApproximation(
 			[negated ? -resultCoefficient : resultCoefficient, resultExponent],
 			precision,
-			Decimal.rounding,
+			rounding,
 		),
 	);
 };
 
 extend(
 	"pow",
-	function pow(this: Decimal, exponent: DecimalLike): Decimal {
-		return powDecimal(this, exponent);
+	function pow(
+		this: Decimal,
+		exponent: DecimalLike,
+		options?: PrecisionOptions,
+	): Decimal {
+		return powDecimal(this, exponent, options);
 	},
 	["power"],
 );

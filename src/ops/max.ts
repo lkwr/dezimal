@@ -10,7 +10,7 @@ declare module "dezi" {
 		 * Returns the largest of the given values, compared exactly. Throws when
 		 * called without arguments.
 		 */
-		max(...values: DecimalLike[]): Decimal;
+		max(...values: DecimalLike[]): import("dezi").Decimal;
 	}
 }
 

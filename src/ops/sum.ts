@@ -9,7 +9,7 @@ declare module "dezi" {
 		/**
 		 * Returns the sum of the given values, computed exactly.
 		 */
-		sum(...values: DecimalLike[]): Decimal;
+		sum(...values: DecimalLike[]): import("dezi").Decimal;
 	}
 }
 

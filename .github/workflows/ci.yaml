@@ -32,6 +32,9 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Consumer types
+        run: node scripts/check-consumer.ts
+
       - name: Bundle size
         run: |
           set -o pipefail

@@ -1,6 +1,7 @@
 import type { RoundingMode } from "dezi";
 import { Decimal } from "../decimal.ts";
 import { abs, digitsOf } from "../utils/common.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 import { exponentialString, plainString } from "../utils/string.ts";
@@ -38,7 +39,7 @@ extend(
 		const [roundedCoefficient, roundedExponent] = roundToScale(
 			this.raw,
 			this.exponent + digitCount - sd,
-			mode ?? Decimal.rounding,
+			currentRounding(mode),
 		);
 		// dezi has no signed zero, so a zero result is always bare.
 		if (roundedCoefficient === 0n) {

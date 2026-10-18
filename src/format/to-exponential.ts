@@ -1,6 +1,7 @@
 import type { RoundingMode } from "dezi";
-import { Decimal } from "../decimal.ts";
+import type { Decimal } from "../decimal.ts";
 import { abs, digitsOf } from "../utils/common.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 import { exponentialString } from "../utils/string.ts";
@@ -49,7 +50,7 @@ extend(
 		const [roundedCoefficient, roundedExponent] = roundToScale(
 			this.raw,
 			this.exponent + digitCount - (dp + 1),
-			mode ?? Decimal.rounding,
+			currentRounding(mode),
 		);
 		const digits = abs(roundedCoefficient).toString();
 		const leadingPower = digits.length + roundedExponent - 1;

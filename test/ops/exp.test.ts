@@ -214,3 +214,12 @@ describe("exp", () => {
 		}
 	});
 });
+
+describe("exp options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(1).exp({ precision: 5 }).toString()).toBe("2.7183");
+		expect(
+			new Decimal(1).exp({ precision: 5, rounding: "down" }).toString(),
+		).toBe("2.7182");
+	});
+});

@@ -1,4 +1,5 @@
 import { Decimal } from "../decimal.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 
@@ -16,5 +17,5 @@ declare module "dezi" {
 }
 
 extend("round", function round(this: Decimal): Decimal {
-	return new Decimal(roundToScale(this.raw, 0, Decimal.rounding));
+	return new Decimal(roundToScale(this.raw, 0, currentRounding()));
 });

@@ -1,24 +1,33 @@
+import type { PrecisionOptions } from "dezi";
 import { Decimal } from "../decimal.ts";
+import { currentPrecision, currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { rootToPrecision } from "../utils/integer-roots.ts";
-import { currentPrecision } from "../utils/precision.ts";
 
 // required extensions
-import "../config/rounding-modes.ts";
+import "../config/precision.ts";
 
 declare module "dezi" {
 	interface Decimal {
 		/**
 		 * Returns the real cube root, sign-preserving for negative values,
 		 * rounded to `Decimal.precision` significant digits using the
-		 * `Decimal.rounding` mode.
+		 * `Decimal.rounding` mode; `options` override both for this call.
 		 */
-		cbrt(): Decimal;
+		cbrt(options?: PrecisionOptions): Decimal;
 	}
 }
 
-extend("cbrt", function cbrt(this: Decimal): Decimal {
-	return new Decimal(
-		rootToPrecision(this.raw, 3, currentPrecision(), Decimal.rounding),
-	);
-});
+extend(
+	"cbrt",
+	function cbrt(this: Decimal, options?: PrecisionOptions): Decimal {
+		return new Decimal(
+			rootToPrecision(
+				this.raw,
+				3,
+				currentPrecision(options?.precision),
+				currentRounding(options?.rounding),
+			),
+		);
+	},
+);

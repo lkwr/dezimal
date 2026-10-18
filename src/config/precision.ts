@@ -4,13 +4,28 @@ import { extendStatic } from "../utils/extend.ts";
 // the precision extension, and only extensions that need it (divide, sqrt,
 // ln, ...) import this module.
 
+// required extensions
+import "./rounding-modes.ts";
+
 declare module "dezi" {
+	/**
+	 * Per-call overrides for precision-based operations, e.g.
+	 * `x.divide(3, { precision: 50 })`. Omitted fields fall back to
+	 * `Decimal.precision` and `Decimal.rounding`.
+	 */
+	export type PrecisionOptions = {
+		/** Significant digits of the result, a positive integer. */
+		precision?: number;
+		/** Rounding mode applied to the result. */
+		rounding?: RoundingMode;
+	};
+
 	interface DecimalConstructor {
 		/**
-		 * Maximum number of significant digits kept by precision-based (inexact)
-		 * operations such as division, roots and logarithms. Valid range is
-		 * 1..1e9; validation is provided by a future `set()` extension, and
-		 * direct assignment bypasses validation.
+		 * Default number of significant digits kept by precision-based
+		 * (inexact) operations such as division, roots and logarithms. Must be
+		 * a positive integer; operations throw a RangeError otherwise.
+		 * Default: 20.
 		 */
 		precision: number;
 	}

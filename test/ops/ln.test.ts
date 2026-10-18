@@ -174,3 +174,12 @@ describe("ln", () => {
 		expect(ln([10n, 0] satisfies RawDecimal)).toEqual(expected);
 	});
 });
+
+describe("ln options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(2).ln({ precision: 5 }).toString()).toBe("0.69315");
+		expect(
+			new Decimal(2).ln({ precision: 5, rounding: "down" }).toString(),
+		).toBe("0.69314");
+	});
+});

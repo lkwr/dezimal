@@ -1,5 +1,6 @@
 import type { RoundingMode } from "dezi";
 import { Decimal } from "../decimal.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 
@@ -31,7 +32,7 @@ extend(
 				`Invalid decimal places: expected a non-negative integer, got ${dp}`,
 			);
 		}
-		return new Decimal(roundToScale(this.raw, -dp, mode ?? Decimal.rounding));
+		return new Decimal(roundToScale(this.raw, -dp, currentRounding(mode)));
 	},
 	["toDP"],
 );

@@ -200,3 +200,16 @@ describe("log", () => {
 		expect(new Decimal("1e20").log(new Decimal(10)).raw).toEqual(expected);
 	});
 });
+
+describe("log options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(2).log(10, { precision: 5 }).toString()).toBe("0.30103");
+		expect(
+			new Decimal(2)
+				.log(undefined, { precision: 5, rounding: "down" })
+				.toString(),
+		).toBe("0.30102");
+		expect(Decimal.log2(10, { precision: 5 }).toString()).toBe("3.3219");
+		expect(Decimal.log10(2, { precision: 3 }).toString()).toBe("0.301");
+	});
+});

@@ -175,3 +175,27 @@ describe("divide", () => {
 		expect(new Decimal(1).div(2n).raw).toEqual([5n, -1]);
 	});
 });
+
+describe("divide options", () => {
+	it("overrides precision and rounding for one call", () => {
+		const third = new Decimal(1).divide(3, { precision: 5 });
+		expect(third.toString()).toBe("0.33333");
+		expect(
+			new Decimal(1).divide(3, { precision: 5, rounding: "up" }).toString(),
+		).toBe("0.33334");
+		expect(new Decimal(2).divide(3, { rounding: "down" }).toString()).toBe(
+			"0.66666666666666666666",
+		);
+		expect(Decimal.precision).toBe(20);
+		expect(Decimal.rounding).toBe("half-up");
+	});
+
+	it("validates the overrides", () => {
+		expect(() => new Decimal(1).divide(3, { precision: 0 })).toThrow(
+			RangeError,
+		);
+		expect(() =>
+			new Decimal(1).divide(3, { rounding: "nearest" as RoundingMode }),
+		).toThrow(RangeError);
+	});
+});

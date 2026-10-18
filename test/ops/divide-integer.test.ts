@@ -95,3 +95,15 @@ describe("divideInteger", () => {
 		expect(new Decimal(7).divToInt(2n).raw).toEqual([3n, 0]);
 	});
 });
+
+describe("divideInteger options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(100).divideInteger(3, { precision: 1 }).raw).toEqual([
+			3n,
+			1,
+		]);
+		expect(
+			new Decimal(100).divideInteger(3, { precision: 1, rounding: "up" }).raw,
+		).toEqual([4n, 1]);
+	});
+});

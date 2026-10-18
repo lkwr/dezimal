@@ -1,6 +1,12 @@
+import "../check/decimal-places.ts";
+import "../check/significant-digits.ts";
+import "../config/rounding-modes.ts";
+import "../format/to-fixed.ts";
 import "../ops/ceil.ts";
 import "../ops/clamp.ts";
 import "../ops/floor.ts";
 import "../ops/round.ts";
 import "../ops/to-decimal-places.ts";
+import "../ops/to-nearest.ts";
+import "../ops/to-significant-digits.ts";
 import "../ops/truncate.ts";

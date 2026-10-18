@@ -270,3 +270,19 @@ describe("pow", () => {
 		expect(pow(self, new Decimal(10))).toEqual(expected);
 	});
 });
+
+describe("pow options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(2).pow("0.5", { precision: 5 }).toString()).toBe(
+			"1.4142",
+		);
+		// 3^40 = 12157665459056928801
+		expect(new Decimal(3).pow(40, { precision: 5 }).toString()).toBe(
+			"12158000000000000000",
+		);
+		expect(
+			new Decimal(3).pow(40, { precision: 5, rounding: "down" }).toString(),
+		).toBe("12157000000000000000");
+		expect(new Decimal(3).pow(-1, { precision: 5 }).toString()).toBe("0.33333");
+	});
+});

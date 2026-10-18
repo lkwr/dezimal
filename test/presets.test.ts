@@ -1,15 +1,13 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Decimal } from "../src/decimal.ts";
 import "../src/preset/basic.ts";
-import "../src/preset/bases.ts";
 import "../src/preset/config.ts";
 import "../src/preset/format.ts";
 import "../src/preset/full.ts";
-import "../src/preset/hyperbolic.ts";
 import "../src/preset/power.ts";
 import "../src/preset/predicate.ts";
 import "../src/preset/rounding.ts";
-import "../src/preset/trigonometric.ts";
 
 describe("presets", () => {
 	it("expose the arithmetic core", () => {
@@ -33,5 +31,17 @@ describe("presets", () => {
 		expect(new Decimal(2).pow(10).raw).toEqual([1024n, 0]);
 		expect(new Decimal(9).sqrt().raw).toEqual([3n, 0]);
 		expect(Decimal.hypot(3, 4).raw).toEqual([5n, 0]);
+	});
+});
+
+describe("full preset", () => {
+	it("imports every shipped extension", () => {
+		const root = new URL("../src/", import.meta.url);
+		const imported = readFileSync(new URL("preset/full.ts", root), "utf8");
+		for (const folder of ["ops", "check", "format", "config"]) {
+			for (const file of readdirSync(new URL(folder, root))) {
+				expect(imported).toContain(`"../${folder}/${file}"`);
+			}
+		}
 	});
 });

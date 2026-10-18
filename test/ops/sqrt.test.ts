@@ -200,3 +200,12 @@ describe("sqrt", () => {
 		expect(() => sqrt([1n, -2000002])).toThrow(RangeError);
 	});
 });
+
+describe("sqrt options", () => {
+	it("overrides precision and rounding for one call", () => {
+		expect(new Decimal(2).sqrt({ precision: 5 }).toString()).toBe("1.4142");
+		expect(
+			new Decimal(2).sqrt({ precision: 5, rounding: "up" }).toString(),
+		).toBe("1.4143");
+	});
+});

@@ -11,7 +11,7 @@ declare module "dezi" {
 		 *
 		 * Throws when called without arguments.
 		 */
-		min(...values: DecimalLike[]): Decimal;
+		min(...values: DecimalLike[]): import("dezi").Decimal;
 	}
 }
 

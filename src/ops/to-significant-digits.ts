@@ -1,6 +1,7 @@
 import type { RoundingMode } from "dezi";
 import { Decimal } from "../decimal.ts";
 import { digitsOf } from "../utils/common.ts";
+import { currentRounding } from "../utils/config.ts";
 import { extend } from "../utils/extend.ts";
 import { roundToScale } from "../utils/rounding.ts";
 
@@ -42,7 +43,7 @@ extend(
 			roundToScale(
 				this.raw,
 				this.exponent + digits - sd,
-				mode ?? Decimal.rounding,
+				currentRounding(mode),
 			),
 		);
 	},

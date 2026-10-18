@@ -50,3 +50,11 @@ describe("notation thresholds (statics)", () => {
 		expect(new Decimal("-1e21").toString()).toBe("-1e+21");
 	});
 });
+
+describe("string coercion", () => {
+	it("uses toString in string contexts", () => {
+		const value = new Decimal("-1.25");
+		expect(`${value}`).toBe("-1.25");
+		expect(String(value)).toBe("-1.25");
+	});
+});
