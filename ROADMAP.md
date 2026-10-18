@@ -2,10 +2,6 @@
 
 What is still missing. Shipped features are documented in the README; remove items here once they land.
 
-## Release
-
-- Set the version to `0.1.0` and publish from `dist/` (tag-triggered workflow with npm provenance).
-
 ## Extensions
 
 | Extension | API | Notes |

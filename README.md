@@ -18,7 +18,7 @@ new Decimal("0.1").plus("0.2").toString(); // "0.3"
 - **Types follow your imports.** Importing an extension adds its methods to the `Decimal` type, so calling something you did not import is a compile error, not a runtime surprise.
 - **Exact where possible.** Addition, subtraction, multiplication and rounding to a scale are exact (bigint based) and never lose digits. Only operations that cannot be exact, such as division, roots and logarithms, round to a configurable precision, and those results are correctly rounded.
 - **No `NaN`, no `Infinity`, no `-0`.** Every value is a finite decimal. Invalid operations throw instead of producing special values.
-- **Fast.** On typical inputs most operations run 1.5–5× faster than decimal.js (see [Performance](#performance)).
+- **Fast.** On typical inputs most operations run 1.5–5× faster than decimal.js (see [Size and performance](#size-and-performance)).
 
 ## Install
 
