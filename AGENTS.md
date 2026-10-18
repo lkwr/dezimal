@@ -4,7 +4,7 @@ Notes for AI agents working in this repo.
 
 ## What dezi is
 
-An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: a tiny core (`src/decimal.ts`) plus small extension modules a consumer imports individually or via presets (`src/preset/*`). `ROADMAP.md` is the source of truth for what exists and what is planned.
+An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: a tiny core (`src/decimal.ts`) plus small extension modules a consumer imports individually or via presets (`src/preset/*`). The README documents what exists; `ROADMAP.md` lists only what is still missing.
 
 ## Hard rules from the maintainer
 
@@ -14,7 +14,7 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
 
 ## Invariants (deliberate deviations from decimal.js)
 
-- **No NaN, no ±Infinity, no signed zero.** Parse is strict; operations that would produce non-finite results throw `RangeError` instead of saturating (details in ROADMAP "Invariants").
+- **No NaN, no ±Infinity, no signed zero.** Parse is strict; operations that would produce non-finite results throw `RangeError` instead of saturating (division by zero, `sqrt` of a negative, `ln`/`log` of a non-positive, inverse functions outside their domain).
 - Zero is always `[0n, 0]`.
 - Results beyond `±Decimal.exponentLimit` throw `RangeError` in both directions — underflow does not flush to zero.
 
@@ -36,7 +36,7 @@ An arbitrary-precision decimal library aiming at decimal.js parity, but opt-in: 
 - Static methods are the exception: only receiver-less operations (`max`, `min`, `sum`, `hypot`, `arctan2`, `sign`, `isDecimal`) and the two-sided `compare` allowlist. No `Decimal.add(x, y)`-style mirrors of instance ops.
 - Arithmetic family is exact (bigints); divide/transcendental ops are precision-based: they round to `Decimal.precision` significant digits using `Decimal.rounding` (a string-union `RoundingMode`, default `"half-up"`). Every such op takes a trailing `options?: PrecisionOptions` (`{ precision?, rounding? }`, declared in `config/precision.ts`) and resolves it via `currentPrecision(options?.precision)`/`currentRounding(options?.rounding)`, which fall back to the statics and validate; explicit `mode` parameters go through `currentRounding(mode)` too.
 - Precision-based ops round **once**: never chain public precision-rounded ops (`a.ln().divide(b.ln())`) — call the `*ToPrecision` helpers with guard digits and round the final value with `roundToPrecision`, or `roundApproximation` when an exact result must survive directed modes. Verify new math against decimal.js on randomized inputs across precisions and all nine modes.
-- Naming: verb primaries without filler words (`divide`, not `dividedBy`; `lessThanOrEqual`, not `lessThanOrEqualTo`), short aliases (`div`, `sub`, `gt`). decimal.js names appear in ROADMAP tables as parity-audit references only.
+- Naming: verb primaries without filler words (`divide`, not `dividedBy`; `lessThanOrEqual`, not `lessThanOrEqualTo`), short aliases (`div`, `sub`, `gt`).
 - Public API signatures use meaningful parameter names, never generic single letters (`sign(value)`, not `sign(x)`; explicit pairs like `compare(a, b)` are fine). Variadic value lists use `...values`.
 - JSDoc describes dezi's behavior in its own terms; never mention decimal.js in JSDoc. Internal file comments may reference decimal.js for design context.
 - Simple shared helpers live in `src/utils/` and are imported, never redeclared per extension file. Check these before writing a local copy:
@@ -53,13 +53,13 @@ decimal.js is dezi's parity target and doubles as a reference for how an impleme
 
 - The code is dated and does not use `bigint`: it stores digits in arrays and rounds in every operation — none of that carries over.
 - Re-express its algorithms on dezi's primitives: normalized `[coefficient, exponent]` bigint pairs, the rounding helpers in `src/utils/rounding.ts`, and the precision/guard patterns of `src/utils/division.ts`, `src/utils/integer-roots.ts` and `src/ops/log.ts`.
-- Keep dezi's invariants (throw instead of NaN/±Infinity, no signed zero) and dezi's naming from ROADMAP.md, never decimal.js's.
+- Keep dezi's invariants (throw instead of NaN/±Infinity, no signed zero) and dezi's naming (as listed in `ROADMAP.md` for planned extensions), never decimal.js's.
 
 ## Workflow for a new extension
 
 1. One file in the right folder, one test mirrored in `test/<folder>/<name>.test.ts` (vitest, imports the extension for side effects via relative path). vitest hides `console` output of passing tests; use assertions, not logs.
 2. Augmentation block, `extend()`/`extendStatic()` registration, side-effect imports of dependencies (last import lines, after a blank line, under the comment `// required extensions`), JSDoc on public members.
-3. Update the `ROADMAP.md` status column and the "N of M shipped" footer; add the extension to presets only when asked (`src/preset/full.ts` is the exception: everything shipped belongs there, and `test/presets.test.ts` covers it).
+3. Remove the item from `ROADMAP.md` and add it to the README (preset/extension tables, "Not yet available" line); add the extension to presets only when asked (`src/preset/full.ts` is the exception: everything shipped belongs there, and `test/presets.test.ts` covers it).
 4. When asked to implement several extensions, use one subagent per extension (their file sets are disjoint).
 5. Validate with `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/vitest run`, `./node_modules/.bin/biome check .`, `node build.ts`, and `pnpm run check-consumer` (after the build). For performance-relevant changes also run `pnpm run bench [filter]` (`scripts/bench.ts`: dezi vs decimal.js in plain Node, asserts equal results first; add a case for new hot paths) and `node scripts/bundle-size.ts` (per-preset min+gzip size). Dependencies: `pnpm i`.
 
