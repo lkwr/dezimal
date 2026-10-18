@@ -33,7 +33,7 @@ jobs:
         run: pnpm run build
 
       - name: Consumer types
-        run: node scripts/check-consumer.ts
+        run: pnpm run check-consumer
 
       - name: Bundle size
         run: |

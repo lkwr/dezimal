@@ -10,7 +10,7 @@
 // 2. A usage fixture typechecks (including that non-imported extensions are
 //    rejected) and runs under plain Node.
 //
-// Usage: node scripts/check-consumer.ts
+// Usage: pnpm run check-consumer
 
 import { execFileSync } from "node:child_process";
 import {
